@@ -127,21 +127,32 @@
             <li class="{% if "/new/" in request.path %}active{%endif%} dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">New <span class="caret"></span></a>
               <ul class="dropdown-menu">
+
+                <!--ADD OPENVAS ENTRY IN MENU------------------------------------>
                 {% if current_user.has_permission("investigation", "write") %}
-                  <li><a href="{{ url_for('frontend.InvestigationView:new')}}">Investigation</a></li>
+                  <!--<li><a href="{{ url_for('frontend.InvestigationView:new')}}">Investigation</a></li>-->
+                  <li class="dropdown-header">New Investigation</li>
+                  {% for name, label in [("investigation", "Investigation"), ("openvas", "Openvas scanner report")] %}
+                  <li><a href="{{ url_for('frontend.InvestigationView:new_subclass', subclass=name) }}">{{label}}</a></li>
+                  {% endfor %}
                 {% endif %}
+                <!--------------------------------------------------------------->
+
                 {% if current_user.has_permission("investigation", "write") and current_user.has_permission("entity", "write") %}
                   <li role="separator" class="divider"></li>
                 {% endif %}
+
                 {% if current_user.has_permission("entity", "write") %}
                   <li class="dropdown-header">New entity</li>
                   {% for name, label in [("malware", "Malware"), ("ttp", "TTP"), ("actor", "Actor"), ("campaign", "Campaign"), ("exploit", "Exploit"), ("exploitkit", "Exploit kit"), ("company", "Company")] %}
                   <li><a href="{{ url_for('frontend.EntityView:new_subclass', subclass=name) }}">{{label}}</a></li>
                   {% endfor %}
                 {% endif %}
+
                 {% if (current_user.has_permission("entity", "write") or current_user.has_permission("investigation", "write")) and current_user.has_permission("indicator", "write") %}
                 <li role="separator" class="divider"></li>
                 {% endif %}
+
                 {% if current_user.has_permission("indicator", "write") %}
                   <li class="dropdown-header">New indicator</li>
                   {% for name, label in [("regex", "Regular expression"), ("yara", "Yara rule")] %}
