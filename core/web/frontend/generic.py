@@ -11,6 +11,8 @@ from core.database import AttachedFile
 from core.web.helpers import get_object_or_404
 from core.web.helpers import requires_permissions
 
+from core.openvas.import_file import import_file
+
 binding_object_classes = {
     "malware": Malware,
     "company": Company,
@@ -39,6 +41,26 @@ class GenericView(FlaskView):
     @route('/new/<string:subclass>', methods=["GET", "POST"])
     def new_subclass(self, subclass):
         klass = self.subclass_map.get(subclass, self.klass)
+        #--------Load Openvas----------------------------------------------------------
+        if klass.__name__.lower() == 'openvass':
+            if request.method == 'POST':
+                obj=klass().import_file(request.form, request.files.get('openvas-file'))
+                obj=obj.save(validate= False)
+                return redirect(
+                    url_for(
+                        'frontend.{}:get'.format(self.__class__.__name__),
+                        id=obj.id))
+
+            form = klass.get_form()()
+            obj = None
+            # return render_template("{}/edit.html".format(klass.__name__.lower()))
+            return render_template(
+                "{}/edit.html".format(klass.__name__.lower()),
+                form=form,
+                obj_type=klass.__name__,
+                obj=obj)
+        #----------------------------------------------------------------------------
+
         return self.new(klass)
 
     @requires_permissions("write")

@@ -1,0 +1,1 @@
+from core.openvas.openvas import Openvas

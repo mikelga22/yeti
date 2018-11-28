@@ -6,6 +6,7 @@ from flask import render_template, request, flash, redirect, url_for
 from mongoengine import DoesNotExist
 
 from core.web.frontend.generic import GenericView
+from core.openvas import Openvas
 from core.investigation import Investigation, ImportMethod, ImportResults
 from core.web.helpers import get_object_or_404
 from core.web.helpers import requires_permissions
@@ -21,6 +22,12 @@ from core.web.api.api import bson_renderer
 class InvestigationView(GenericView):
 
     klass = Investigation
+    #Add subclass---------------------
+    subclass_map = {
+        'investigation': Investigation,
+        'openvas': Openvas
+    }
+    #---------------------------------
 
     @route("/graph/<id>")
     @requires_permissions("read", "investigation")

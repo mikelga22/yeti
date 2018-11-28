@@ -56,8 +56,18 @@ class Investigation(YetiDocument):
         'links', 'nodes', 'events', 'created', 'updated', 'created_by',
         'import_document', 'import_md', 'import_url', 'import_text']
 
+    #-----------------------------------------------------------------
     # Ignore extra fields
-    meta = {'strict': False}
+    meta = {'strict': False, 'allow_inheritance': True}
+
+    @property
+    def type(self):
+        return self._cls.split(".")[-1]
+
+    @property
+    def full_type(self):
+        return self._cls
+    #-----------------------------------------------------------------
 
     @classmethod
     def get_form(klass):
