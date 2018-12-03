@@ -34,6 +34,11 @@ class GenericView(FlaskView):
     @requires_permissions("read")
     def get(self, id):
         obj = self.klass.objects.get(id=id)
+        #------------------------------------------------------
+        if obj.type.lower()=='openvas':
+            return render_template(
+            "{}/single.html".format(obj.type.lower()), obj=obj)
+        #------------------------------------------------------
         return render_template(
             "{}/single.html".format(self.klass.__name__.lower()), obj=obj)
 
@@ -42,7 +47,7 @@ class GenericView(FlaskView):
     def new_subclass(self, subclass):
         klass = self.subclass_map.get(subclass, self.klass)
         #--------Load Openvas----------------------------------------------------------
-        if klass.__name__.lower() == 'openvass':
+        if klass.__name__.lower() == 'openvas':
             if request.method == 'POST':
                 obj=klass().import_file(request.form, request.files.get('openvas-file'))
                 obj=obj.save(validate= False)
@@ -53,7 +58,6 @@ class GenericView(FlaskView):
 
             form = klass.get_form()()
             obj = None
-            # return render_template("{}/edit.html".format(klass.__name__.lower()))
             return render_template(
                 "{}/edit.html".format(klass.__name__.lower()),
                 form=form,
