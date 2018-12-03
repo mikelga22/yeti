@@ -54,7 +54,7 @@
     {{display_tags(element) -}}
   {% elif key == "last_analyses" -%}
     {{display_last_analyses(element) -}}
-  {% elif key == "created" -%}
+  {% elif key == "created" or key=="updated"-%}
     {{display_datetime(element) -}}
   {% elif key == "pattern" -%}
     <code>{{element -}}</code>
