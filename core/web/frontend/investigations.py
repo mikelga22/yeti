@@ -22,12 +22,6 @@ from core.web.api.api import bson_renderer
 class InvestigationView(GenericView):
 
     klass = Investigation
-    #Add subclass---------------------
-    subclass_map = {
-        'investigation': Investigation,
-        'openvas': Openvas
-    }
-    #---------------------------------
 
     @route("/graph/<id>")
     @requires_permissions("read", "investigation")
