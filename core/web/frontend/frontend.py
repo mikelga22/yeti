@@ -9,6 +9,7 @@ from core.web.frontend.indicators import IndicatorView
 from core.web.frontend.investigations import InvestigationView
 from core.web.frontend.system import SystemView
 from core.web.frontend.actions import ActionsView
+from core.web.frontend.openvas import OpenvasView
 
 from core.observables import *
 from core.entities import *
@@ -54,6 +55,7 @@ ObservableView.register(frontend)
 InvestigationView.register(frontend)
 SystemView.register(frontend)
 ActionsView.register(frontend)
+OpenvasView.register(frontend)
 
 # Admin views
 
