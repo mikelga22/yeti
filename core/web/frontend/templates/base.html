@@ -132,9 +132,8 @@
                 {% if current_user.has_permission("investigation", "write") %}
                   <!--<li><a href="{{ url_for('frontend.InvestigationView:new')}}">Investigation</a></li>-->
                   <li class="dropdown-header">New Investigation</li>
-                  {% for name, label in [("investigation", "Investigation"), ("openvas", "Openvas scanner report")] %}
-                  <li><a href="{{ url_for('frontend.InvestigationView:new_subclass', subclass=name) }}">{{label}}</a></li>
-                  {% endfor %}
+                  <li><a href="{{ url_for('frontend.InvestigationView:new') }}">Investigation</a></li>
+                  <li><a href="{{ url_for('frontend.OpenvasView:new') }}">Openvas scanner report</a></li>
                 {% endif %}
                 <!--------------------------------------------------------------->
 

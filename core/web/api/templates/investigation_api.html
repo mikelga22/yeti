@@ -17,9 +17,15 @@
         <a href="{{ url_for('frontend.InvestigationView:graph', id=obj['id']) }}"><i class="flaticon-network38"></i></a>
     </td>
     <td>
+      {%if obj.type.lower()=='investigation'%}
       <a href="{{ url_for("frontend.InvestigationView:get", id=obj['id'])}}">
         {{obj['name'] or 'Unnamed'}}
       </a>
+      {%else%}
+      <a href="{{ url_for("frontend.OpenvasView:get", id=obj['id'])}}">
+        {{obj['name'] or 'Unnamed'}}
+      </a>
+      {%endif%}
     </td>
     <td>{{macros.display_datetime(obj.created)}}</td>
     <td>{{macros.display_datetime(obj.updated)}}</td>
