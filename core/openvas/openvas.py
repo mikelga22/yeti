@@ -34,32 +34,39 @@ class Result(EmbeddedDocument):
 
         return self
 
+    def info(self):
+        result = self.to_mongo()
+        #result['nvt'] = [self.nvt.to_mongo()]
+        result['nvt']=self.nvt
+
+        return result
+
 class Nvt(Document):
     # oid=StringField(verbose_name="OID", unique=True
-    oid = StringField(verbose_name="OID")
+    oid = StringField(verbose_name="OID", unique=True)
     name=StringField(verbose_name="Name")
     references=ListField(verbose_name="References")
-    info=ListField(verbose_name="Information")
+    information=ListField(verbose_name="Information")
     certs=ListField(verbose_name="Certs")
     cve=StringField(verbose_name="CVE")
 
 
     def create(self,nvt):
-        self.oid=nvt.attrib.values()[0]
-        self.name = nvt.find('name').text
-        self.references=[]
-        self.references = nvt.find('xref').text.split('\n')
-        #self.info=[]
-        self.info=nvt.find('tags').text.split('|')
-        self.cve = nvt.find('cve').text.replace(' ', '')
-        #self.certs=[]
-        self.certs=self.get_certs(nvt.find('cert'))
 
-        obj=self.save()
-        # try:
-        #     obj=Nvt.objects.get(oid=self.oid)
-        # except DoesNotExist:
-        #     obj=self.save()
+        self.oid = nvt.attrib.values()[0]
+
+        try:
+            obj=Nvt.objects.get(oid=self.oid)
+        except DoesNotExist:
+            self.name = nvt.find('name').text
+            self.references=[]
+            self.references = nvt.find('xref').text.split('\n')
+            #self.info=[]
+            self.information=self.get_information(nvt.find('tags').text)
+            self.cve = nvt.find('cve').text.replace(' ', '')
+            #self.certs=[]
+            self.certs=self.get_certs(nvt.find('cert'))
+            obj = self.save()
 
         return obj
 
@@ -67,11 +74,24 @@ class Nvt(Document):
         list=[]
         for cert in certs:
             list.append(cert.attrib.values()[0])
+        if len(list)==0:
+            return None
         return list
 
-    def get_tags(self,tags):
-        list=[]=tags.split('|')
+    def get_information(self,tags):
+        list=[]
+        for element in tags.split('|'):
+            element=element.split('=')
+            e={}
+            e[element[0]]=element[1]
+            list.append(e)
+
         return list
+
+    def info(self):
+        result = self.to_mongo()
+
+        return result
 
 
 class Openvas (Investigation):
@@ -116,7 +136,7 @@ class Openvas (Investigation):
             result=Result().create(r)
             self.results.append(result)
 
-        return self;
+        return self
 
     def get_hosts(self,hosts):
         pass
