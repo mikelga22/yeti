@@ -36,13 +36,11 @@ class Result(EmbeddedDocument):
 
     def info(self):
         result = self.to_mongo()
-        #result['nvt'] = [self.nvt.to_mongo()]
         result['nvt']=self.nvt
 
         return result
 
 class Nvt(Document):
-    # oid=StringField(verbose_name="OID", unique=True
     oid = StringField(verbose_name="OID", unique=True)
     name=StringField(verbose_name="Name")
     references=ListField(verbose_name="References")
@@ -61,10 +59,8 @@ class Nvt(Document):
             self.name = nvt.find('name').text
             self.references=[]
             self.references = nvt.find('xref').text.split('\n')
-            #self.info=[]
             self.information=self.get_information(nvt.find('tags').text)
             self.cve = nvt.find('cve').text.replace(' ', '')
-            #self.certs=[]
             self.certs=self.get_certs(nvt.find('cert'))
             obj = self.save()
 
@@ -76,6 +72,7 @@ class Nvt(Document):
             list.append(cert.attrib.values()[0])
         if len(list)==0:
             return None
+
         return list
 
     def get_information(self,tags):
@@ -106,9 +103,7 @@ class Openvas (Investigation):
 
     exclude_fields = Investigation.exclude_fields+['report_date','hosts','ports','results_count','severity','results','oid']
 
-
-
-    def import_file(self, form, f):
+    def create(self, form, f):
         file = ET.parse(f)
         report = file.getroot().find('report')
         self.created_by=form.get('created_by')
@@ -118,25 +113,42 @@ class Openvas (Investigation):
             self.name=form.get('name')
         else:
             self.name = file.getroot().find('name').text
-
         self.report_date = datetime.strptime(file.getroot().find('creation_time').text,'%Y-%m-%dT%H:%M:%SZ')
-
-        for h in report.findall('host'):
-            self.hosts.append(h.find('ip').text)
-        # self.host = report.find('host').find('ip').text
-        #self.hosts = self.hosts[:-2].replace('\n', '')
-
-        for port in report.find('ports').findall('port'):
-            self.ports.append(port.text)
-        #.ports = self.ports[:-2].replace('\n', '')#.replace(' ', '')
         self.results_count = report.find('result_count').find('filtered').text
         self.severity = report.find('severity').find('filtered').text
 
-        for r in report.find('results'):
-            result=Result().create(r)
-            self.results.append(result)
+        self.get_hosts(report.findall('host'))
+        self.get_ports(report.find('ports').findall('port'))
+        self.get_results(report.find('results'))
 
         return self
 
     def get_hosts(self,hosts):
-        pass
+        list=[]
+        for host in hosts:
+            ip=host.find('ip').text
+            list.append(ip)
+
+            # for detail in host.findall('detail'):
+            #     if (detail.find('name').text.lower()=='os-detection'):
+            #         os=detail.find('value').text
+            #         list.append({'host':ip,'os':os})
+            #         print(os)
+
+        self.hosts=list
+
+    def get_ports(self,ports):
+        list=[]
+        for port in ports:
+            list.append(port.text)
+
+        self.ports=list
+
+    def get_results(self, results):
+        list=[]
+
+        for r in results:
+            result=Result().create(r)
+            list.append(result)
+
+        self.results=list

@@ -7,9 +7,11 @@ from mongoengine import DoesNotExist
 
 from core.web.frontend.investigations import InvestigationView
 from core.openvas import Openvas
+from core.openvas.import_file import import_file
 from core.web.helpers import get_queryset
 from core.web.api.crud import CrudSearchApi
 from core.web.helpers import requires_permissions
+
 
 class OpenvasView(InvestigationView):
 
@@ -20,9 +22,6 @@ class OpenvasView(InvestigationView):
         result=""
         for r in obj.results:
             if r.name==name:
-                # re=r.to_mongo()
-                # re['nvt'] = [r.nvt.to_mongo()]
-
                 return render_template(
                     "{}/result.html".format('openvas'), obj=r)
 
@@ -44,9 +43,9 @@ class OpenvasView(InvestigationView):
     @route('/new', methods=["GET", "POST"])
     def new(self, klass=None):
         klass = Openvas
+        flash('todo bien','danger')
         if request.method == 'POST':
-            obj = klass().import_file(request.form, request.files.get('openvas-file'))
-            obj = obj.save(validate=False)
+            obj=import_file(request.form, request.files.get('openvas-file'))
             return redirect(
                 url_for(
                     'frontend.{}:get'.format(self.__class__.__name__),
