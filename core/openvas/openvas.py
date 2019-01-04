@@ -112,7 +112,7 @@ class Openvas (Investigation):
         if form.get('name'):
             self.name=form.get('name')
         else:
-            self.name = file.getroot().find('name').text
+            self.name = 'Openvas({})'.format(file.getroot().find('name').text)
         self.report_date = datetime.strptime(file.getroot().find('creation_time').text,'%Y-%m-%dT%H:%M:%SZ')
         self.results_count = report.find('result_count').find('filtered').text
         self.severity = report.find('severity').find('filtered').text
