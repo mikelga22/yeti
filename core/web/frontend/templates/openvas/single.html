@@ -36,7 +36,7 @@
                         </h3>
 
                     </div>
-                    <div id="investigation_description" class="panel-body markdown-text">{% if investigation.description %}{{investigation.description}}{%else%}No description provided{%endif%}
+                    <div id="investigation_description" class="panel-body markdown-text">{% if investigation._fields %}{{investigation.description}}{%else%}No description provided{%endif%}
                     </div>
                 </div>
             </div>
@@ -44,12 +44,13 @@
         <!-----------Show results---------------------------->
         <div class="row">
             <div class="col-md-12">
-                <table class="table table-condensed main-table">
+                <table class="table table-condensed main-table yeti-table table-hover">
                     <caption><h3>Results</h3></caption>
                     <thead>
                     <tr>
                         <th>Vulnerability</th>
                         <th>Severity</th>
+                        <th>QoD</th>
                         <th>Host</th>
                         <th>Port</th>
                     </tr>
@@ -57,9 +58,10 @@
                     <tbody>
                     {% for result in investigation.results %}
                     <tr>
-                        <td>{{result.name}}</td>
+                        <td><a href="{{ url_for("frontend.OpenvasView:result", name=result['name'], id=investigation['id'])}}">{{result.name}}</a></td>
                         <td>{{result.severity}} ({{result.threat}})</td>
-                        <td>{{result.host}}</td>
+                        <td>{{result.qod}} %</td>
+                        <td><a href="{{url_for("frontend.OpenvasView:filter", host=result['host'])}}">{{result.host}}</td></td>
                         <td>{{result.port}}</td>
                     </tr>
                     {% endfor %}
@@ -73,16 +75,25 @@
     <!-- end first column -->
 
     <div class="col-md-3">
-
         <div class="panel panel-primary yeti-panel">
             <div class="panel-heading">
                 <h3 class="panel-title">Info</h3>
             </div>
             <div class="panel-body">
                 <table class="table table-condensed main-table">
-                    {% for key, value in investigation.info().items() %}
-                    {% if key not in ["_id", "results", "_cls", "description", "oid", "links", "nodes", "events",
-                    "name", "import_document", "import_text", "import_md", "ports"] %}
+                    {% set items=investigation.info().items()%}
+                    <tr><th><h5>General info</h5></th></tr>
+                    {% for key, value in items %}
+                    {% if key in ["created_by", "created", "updated"] %}
+                    <tr>
+                        <th>{{key}}</th>
+                        <td>{{macros.display_yeti(investigation, key)}}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    <tr><th><br><h5>Report info</h5></th><td></td></tr>
+                    {% for key, value in items %}
+                    {% if key not in ["created_by", "created", "updated", "_id", "results", "_cls", "description", "oid", "links", "nodes", "events","name", "import_document", "import_text", "import_md", "ports"] %}
                     <tr>
                         <th>{{key}}</th>
                         {% if key not in ["hosts", "ports"] %}
