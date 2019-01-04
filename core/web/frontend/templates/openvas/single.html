@@ -58,10 +58,11 @@
                     <tbody>
                     {% for result in investigation.results %}
                     <tr>
-                        <td><a href="{{ url_for("frontend.OpenvasView:result", name=result['name'], id=investigation['id'])}}">{{result.name}}</a></td>
+                        <td><a href="{{ url_for("frontend.OpenvasView:result", id=investigation['id'], name=result['name'])}}">{{result.name}}</a></td>
                         <td>{{result.severity}} ({{result.threat}})</td>
                         <td>{{result.qod}} %</td>
-                        <td><a href="{{url_for("frontend.OpenvasView:filter", host=result['host'])}}">{{result.host}}</td></td>
+                        <!--<td><a href="{{url_for("frontend.OpenvasView:filter", field='hosts', value=result['host'])}}">{{result.host}}</a></td>-->
+                        <td>{{result.host}}</td>
                         <td>{{result.port}}</td>
                     </tr>
                     {% endfor %}
@@ -82,7 +83,7 @@
             <div class="panel-body">
                 <table class="table table-condensed main-table">
                     {% set items=investigation.info().items()%}
-                    <tr><th><h5>General info</h5></th></tr>
+                    <tr><th><h5>Investigation info</h5></th></tr>
                     {% for key, value in items %}
                     {% if key in ["created_by", "created", "updated"] %}
                     <tr>

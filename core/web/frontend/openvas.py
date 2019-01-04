@@ -17,7 +17,7 @@ class OpenvasView(InvestigationView):
 
     @requires_permissions("read")
     #@route('/<result>', methods=["GET", "POST"])
-    def result(self, name, id):
+    def result(self, id, name):
         obj = self.klass.objects.get(id=id)
         result=""
         for r in obj.results:
@@ -26,12 +26,9 @@ class OpenvasView(InvestigationView):
                     "{}/result.html".format('openvas'), obj=r)
 
     @requires_permissions("read")
-    # @route('/<result>', emethods=["GET", "POST"])
-    def filter(self, host):
-        obj=Openvas()
-        obj.hosts=host
+    def filter(self, field,value):
         return render_template(
-            "{}/filter.html".format('openvas'), obj=host)
+            "{}/filter.html".format('openvas'), obj={'field':field, 'value':value})
 
     @requires_permissions("read")
     def get(self, id):
@@ -43,7 +40,6 @@ class OpenvasView(InvestigationView):
     @route('/new', methods=["GET", "POST"])
     def new(self, klass=None):
         klass = Openvas
-        flash('todo bien','danger')
         if request.method == 'POST':
             obj=import_file(request.form, request.files.get('openvas-file'))
             return redirect(

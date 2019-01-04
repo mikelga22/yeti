@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% import "macros/filterlist.html" as filterlist %}
+
+{% block title %}
+{{obj}}
+{% endblock %}
+
+{% block breadcrumb %}
+<!--<ol class="breadcrumb">
+	<li>YETI</li>
+	<li class="active">Investigations</li>
+</ol>-->
+{% endblock %}
+
+{% block main %}
+    <h2>{{ obj.field.title() }} {{ obj.value }}</h2>
+    {% if obj.field=='hosts' %}
+    {{ filterlist.sidebar_filter(url_for('api.InvestigationSearch:post'), "openvas_content", _cls='^Investigation.Openvas$', hosts=obj.value,order_by="-updated") }}
+    {% elif obj.field=='ports'%}
+    {{ filterlist.sidebar_filter(url_for('api.InvestigationSearch:post'), "openvas_content", _cls='^Investigation.Openvas$', portss=obj.value,order_by="-updated") }}
+    {% endif %}
+{% endblock %}
+
+{% block custom_head %}
+<script type="text/javascript" src="{{ url_for('frontend.static', filename='yeti/js/crud.js') }}" charset="utf-8"></script>
+{%endblock%}
