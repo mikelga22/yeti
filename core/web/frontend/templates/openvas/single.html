@@ -58,7 +58,7 @@
                     <tbody>
                     {% for result in investigation.results %}
                     <tr>
-                        <td><a href="{{ url_for("frontend.OpenvasView:result", id=investigation['id'], name=result['name'])}}">{{result.name}}</a></td>
+                        <td><a href="{{ url_for("frontend.OpenvasView:result", id=investigation['id'], name=macros.format_url(result['name']))}}">{{result.name}}</a></td>
                         <td>{{result.severity}} ({{result.threat}})</td>
                         <td>{{result.qod}} %</td>
                         <!--<td><a href="{{url_for("frontend.OpenvasView:filter", field='hosts', value=result['host'])}}">{{result.host}}</a></td>-->
@@ -87,16 +87,16 @@
                     {% for key, value in items %}
                     {% if key in ["created_by", "created", "updated"] %}
                     <tr>
-                        <th>{{key}}</th>
+                        <th>{{macros.format_name(key)}}</th>
                         <td>{{macros.display_yeti(investigation, key)}}</td>
                     </tr>
                     {% endif %}
                     {% endfor %}
-                    <tr><th><br><h5>Report info</h5></th><td></td></tr>
+                    <tr><th><br><h5>Scan info</h5></th><td></td></tr>
                     {% for key, value in items %}
                     {% if key not in ["created_by", "created", "updated", "_id", "results", "_cls", "description", "oid", "links", "nodes", "events","name", "import_document", "import_text", "import_md", "ports"] %}
                     <tr>
-                        <th>{{key}}</th>
+                        <th>{{macros.format_name(key)}}</th>
                         {% if key not in ["hosts", "ports"] %}
                         <td>{{macros.display_yeti(investigation, key)}}</td>
                         {% else %}

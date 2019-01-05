@@ -18,6 +18,9 @@ class OpenvasView(InvestigationView):
     @requires_permissions("read")
     #@route('/<result>', methods=["GET", "POST"])
     def result(self, id, name):
+        if ('_' in name):
+            words=name.split('_')
+            name=('/').join(words)
         obj = self.klass.objects.get(id=id)
         result=""
         for r in obj.results:

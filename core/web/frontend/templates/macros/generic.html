@@ -75,6 +75,14 @@
     {{ key.capitalize() -}}
 {%- endmacro -%}
 
+{% macro format_url(name) -%}
+    {% if "/" in name -%}
+        {% set words = name.split("/") -%}
+        {% set name = words|join("_") -%}
+    {% endif -%}
+    {{ name -}}
+{%- endmacro -%}
+
 {% macro render_field(field) -%}
   {% if field.type in ['CSRFTokenField', 'HiddenField'] %}
     {{ field() }}
