@@ -67,6 +67,14 @@
   {% endif -%}
 {%- endmacro -%}
 
+{% macro format_name(key) -%}
+    {% if "_" in key -%}
+        {% set words = key.split("_") -%}
+        {% set key = words|join(" ") -%}
+    {% endif -%}
+    {{ key.capitalize() -}}
+{%- endmacro -%}
+
 {% macro render_field(field) -%}
   {% if field.type in ['CSRFTokenField', 'HiddenField'] %}
     {{ field() }}
