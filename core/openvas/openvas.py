@@ -8,6 +8,7 @@ from flask import url_for
 from core.investigation import Investigation
 import xml.etree.ElementTree as ET
 from datetime import datetime
+import re
 
 
 class Result(EmbeddedDocument):
@@ -40,13 +41,17 @@ class Result(EmbeddedDocument):
 
         return result
 
-class Nvt(Document):
+class Nvt(YetiDocument):
+
+    DISPLAY_INFO = [("summary", "Summary"), ("impact", "Impact"), ("affected", "Affected Software/OS"), ("insight", "Vulnerability Insight"), ("insight", "Vulnerability insight"), ("solution", "Solution"), ("vuldetect", "Vulnerability detection method")]
+
     oid = StringField(verbose_name="OID", unique=True)
     name=StringField(verbose_name="Name")
+    family=StringField(verbose_name="Family")
     references=ListField(verbose_name="References")
-    information=ListField(verbose_name="Information")
+    information=DictField(verbose_name="Information")
     certs=ListField(verbose_name="Certs")
-    cve=StringField(verbose_name="CVE")
+    cves=ListField(verbose_name="CVE")
 
 
     def create(self,nvt):
@@ -57,33 +62,48 @@ class Nvt(Document):
             obj=Nvt.objects.get(oid=self.oid)
         except DoesNotExist:
             self.name = nvt.find('name').text
-            self.references=[]
-            self.references = nvt.find('xref').text.split('\n')
-            self.information=self.get_information(nvt.find('tags').text)
-            self.cve = nvt.find('cve').text.replace(' ', '')
-            self.certs=self.get_certs(nvt.find('cert'))
+            self.family = nvt.find('family').text
+
+            self.extract_references(nvt.find('xref').text)
+            self.extract_information(nvt.find('tags').text)
+            self.extract_cves(nvt.find('cve').text)
+            self.extract_certs(nvt.find('cert'))
             obj = self.save()
 
         return obj
 
-    def get_certs(self, certs):
+    def extract_certs(self, certs):
         list=[]
         for cert in certs:
-            list.append(cert.attrib.values()[0])
+            list.append(cert.attrib.values()[1])
         if len(list)==0:
             return None
 
-        return list
+        self.certs=list
 
-    def get_information(self,tags):
-        list=[]
+    def extract_cves(self, cves):
+        if(cves!='NOCVE'):
+            list=cves.split(', ')
+
+            self.cves=list
+
+    def extract_references(self, references):
+        list=re.findall('https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+', references)
+
+        self.references=list
+
+    def extract_information(self,tags):
+        e = {}
         for element in tags.split('|'):
             element=element.split('=')
-            e={}
+            if(len(element)>2):
+                list_temp=[]
+                for i in range(1, len(element)):
+                    list_temp.append(element[i])
+                element[1]=('=').join(list_temp)
             e[element[0]]=element[1]
-            list.append(e)
 
-        return list
+        self.information=e
 
     def info(self):
         result = self.to_mongo()
@@ -117,13 +137,13 @@ class Openvas (Investigation):
         self.results_count = report.find('result_count').find('filtered').text
         self.severity = report.find('severity').find('filtered').text
 
-        self.get_hosts(report.findall('host'))
-        self.get_ports(report.find('ports').findall('port'))
-        self.get_results(report.find('results'))
+        self.extract_hosts(report.findall('host'))
+        self.extract_ports(report.find('ports').findall('port'))
+        self.extract_results(report.find('results'))
 
         return self
 
-    def get_hosts(self,hosts):
+    def extract_hosts(self,hosts):
         list=[]
         for host in hosts:
             ip=host.find('ip').text
@@ -137,14 +157,14 @@ class Openvas (Investigation):
 
         self.hosts=list
 
-    def get_ports(self,ports):
+    def extract_ports(self,ports):
         list=[]
         for port in ports:
             list.append(port.text)
 
         self.ports=list
 
-    def get_results(self, results):
+    def extract_results(self, results):
         list=[]
 
         for r in results:
