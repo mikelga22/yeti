@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% import "macros/generic.html" as macros %}
+{% import "macros/filterlist.html" as filterlist %}
+{% import "macros/indicators.html" as indicators %}
+{% import "macros/malware.html" as malware %}
+{% import "macros/actors.html" as actors %}
+{% import "macros/ttps.html" as ttps %}
+{% import "macros/observables.html" as observables %}
+{% import "macros/results.html" as results %}
+
+
+{% block title %}
+    {{ obj.name }}
+{% endblock %}
+
+{% block main %}
+    {% set result = obj %}
+    <div class="row">
+        <!-- start first column -->
+        <div class="col-md-9">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h4 class="panel-title"></h4>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">
+                                {{ result.name }}
+                            </h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <table class="table main-table yeti-table">
+                                        <tbody>
+                                        {% if result['description'] %}
+                                            <tr>
+                                                <td>
+                                                    <b>Description</b>
+                                                    {{ results.display_description(result['description']) }}
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                        {% set nvt=result.nvt %}
+                                            {{ results.display_info(nvt) }}
+                                            {% if nvt['cvs'] or nvt['certs'] or nvt['references']%}
+                                            {{ results.display_references(nvt) }}
+                                            {% endif %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-----------Show results---------------------------->
+            <div class="row">
+                <div class="col-md-12">
+
+                </div>
+            </div>
+            <!-------------------------------------->
+
+        </div>
+        <!-- end first column -->
+
+        <div class="col-md-3">
+
+            <div class="panel panel-primary yeti-panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Info</h3>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-condensed main-table">
+                        {% for key, value in result.info().items() %}
+                            {% if key in ["host", "port", "threat", "severity", "qod"] %}
+                                <tr>
+                                    <th>{{ macros.format_name(key) }}</th>
+                                    <td>{{ macros.display_yeti(result, key) }}{% if key=='qod'%} %{% endif %}</td>
+
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+
+        </div> <!-- end second column -->
+
+    </div><!-- end row -->
+
+{% endblock %}
+
+{% block custom_head %}
+    <script type="text/javascript" src="{{ url_for('frontend.static', filename='yeti/js/crud.js') }}"
+            charset="utf-8"></script>
+    <script type="text/javascript" src="{{ url_for('frontend.static', filename='yeti/js/import.js') }}"
+            charset="utf-8"></script>
+{% endblock %}

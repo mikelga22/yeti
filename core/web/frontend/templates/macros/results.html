@@ -1,0 +1,67 @@
+{% import "macros/generic.html" as macros %}
+{% macro display_field(field) -%}
+    {% for part in field.split('\n\n') %}
+        <p>{{ part }}</p>
+    {% endfor -%}
+{%- endmacro %}
+
+{% macro display_info(nvt) -%}
+    {% set info=nvt.information %}
+    {% for key,value in nvt.DISPLAY_INFO %}
+        {% if info[key] %}
+            <tr>
+                <td>
+                    <b>{{ value }}</b>
+                    {% if key=='solution' %}
+                        {% if info['solution_type'] %}
+                            <p><b>Solution type: </b>{{ info['solution_type'] }}</p>
+                        {% endif %}
+                    {% endif %}
+                    <p>{{ display_field(info[key]) }}</p>
+            </tr>
+        {% endif %}
+    {% endfor %}
+{%- endmacro %}
+
+{% macro display_references(nvt) -%}
+    <tr>
+        <td>
+            <b>References</b>
+            <p></p>
+            <table class="table table-sm yeti-table">
+                <tbody>
+                {% if nvt['cves'] -%}
+                <tr>
+                    <td>CVE:</td>
+                    <td>
+                        {{ nvt['cves']|join(", ") }}
+                    </td>
+                </tr>
+                {% endif %}
+                {% if nvt['certs'] -%}
+                <tr>
+                    <td>Certs:</td>
+                    <td>{{ nvt['certs']|join(", ") }}</td>
+                </tr>
+                {% endif %}
+                {% if nvt['references'] -%}
+                <tr>
+                    <td>Other:</td>
+                    <td>
+                        {% for ref in nvt.references %}
+                            <p><a href={{ ref }} target="_blank">{{ ref }}</a></p>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </td>
+    </tr>
+{%- endmacro %}
+
+{% macro display_description(description) -%}
+    {% for part in description %}
+        <p>{{ part }}</p>
+    {% endfor -%}
+{%- endmacro %}
