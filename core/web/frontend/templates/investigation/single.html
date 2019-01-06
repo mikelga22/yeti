@@ -66,7 +66,7 @@
         <table class="table table-condensed main-table">
           {% for key, value in investigation.info().items() %}
           {% if key not in ["_id", "_cls", "description", "links", "nodes", "events", "name", "import_document", "import_text", "import_md"] %}
-            <tr><th>{{key}}</th><td>{{macros.display_yeti(investigation, key)}}</td></tr>
+            <tr><th>{{macros.format_name(key)}}</th><td>{{macros.display_yeti(investigation, key)}}</td></tr>
           {% endif %}
           {% endfor %}
         </table>
