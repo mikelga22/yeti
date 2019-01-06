@@ -50,6 +50,42 @@ span.yeti-toggle {
   cursor:pointer;
 }
 
+/* Openvas*/
+
+.borderless > tbody > tr > td{
+    border:none;
+}
+
+.progressbar-threat .progressbar-threat-text{
+    position: relative;
+    color:#fff;
+    width:100px;
+}
+
+.progressbar-threat{
+    border-radius: 3px;
+}
+
+.threat-div{
+    width:100px;
+    border-radius: 3px;
+    text-align: center;
+    border-color: black;
+    background-color: #2F3030;
+}
+
+.high {
+    background-color: #C94F4F;
+}
+
+.medium{
+    background-color: #D88735;
+}
+
+.low{
+    background-color: #359AD8;
+}
+
 /* Dropzone */
 
 #dropzone {

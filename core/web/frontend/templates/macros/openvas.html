@@ -5,6 +5,26 @@
     {% endfor -%}
 {%- endmacro %}
 
+{% macro display_threatbar(threat,severity) -%}
+    <div class=" threat-div">
+        <div class=" progressbar-threat {{ threat.lower() }}" style="width:{{ severity *10 }}px;">
+            <div class="progressbar-threat-text">{{ severity }} ({{ threat }})</div>
+        </div>
+    </div>
+{%- endmacro %}
+
+{% macro get_threat(severity) -%}
+    {% if severity==0 -%}
+        Log
+    {% elif 0 <severity < 4 -%}
+        Low
+    {% elif 3.9 <severity < 5 -%}
+        Medium
+    {% elif 4.9 <severity < 11 -%}
+        High
+    {% endif %}
+{%- endmacro %}
+
 {% macro display_info(nvt) -%}
     {% set info=nvt.information %}
     {% for key,value in nvt.DISPLAY_INFO %}
@@ -28,7 +48,7 @@
         <td>
             <b>References</b>
             <p></p>
-            <table class="table table-sm yeti-table">
+            <table class="table table-sm borderless">
                 <tbody>
                 {% if nvt['cves'] -%}
                 <tr>
