@@ -16,17 +16,16 @@ from core.web.helpers import requires_permissions
 class OpenvasView(InvestigationView):
 
     @requires_permissions("read")
-    #@route('/<result>', methods=["GET", "POST"])
+    #@route('/result/<id>/<string:name>', methods=["GET", "POST"])
     def result(self, id, name):
         if ('_' in name):
             words=name.split('_')
             name=('/').join(words)
         obj = self.klass.objects.get(id=id)
-        result=""
-        for r in obj.results:
-            if r.name==name:
+        for result in obj.results:
+            if result.name==name:
                 return render_template(
-                    "{}/result.html".format('openvas'), obj=r)
+                    "{}/result.html".format('openvas'), obj=result)
 
     @requires_permissions("read")
     def filter(self, field,value):
@@ -44,11 +43,17 @@ class OpenvasView(InvestigationView):
     def new(self, klass=None):
         klass = Openvas
         if request.method == 'POST':
-            obj=import_file(request.form, request.files.get('openvas-file'))
-            return redirect(
-                url_for(
-                    'frontend.{}:get'.format(self.__class__.__name__),
-                    id=obj.id))
+            if(request.files.get('openvas-file')):
+                try:
+                    obj=import_file(request.form, request.files.get('openvas-file'))
+                    return redirect(
+                        url_for(
+                            'frontend.{}:get'.format(self.__class__.__name__),
+                            id=obj.id))
+                except:
+                    flash("Error processing file", "danger")
+            else:
+                flash("No file selected")
 
         form = klass.get_form()()
         obj = None
