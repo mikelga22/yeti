@@ -54,6 +54,7 @@ span.yeti-toggle {
 
 .borderless > tbody > tr > td{
     border:none;
+    text-align: justify;
 }
 
 .progressbar-threat .progressbar-threat-text{
