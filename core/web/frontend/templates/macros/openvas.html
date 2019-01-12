@@ -52,7 +52,7 @@
                 <tbody>
                 {% if nvt['cves'] -%}
                 <tr>
-                    <td>CVE:</td>
+                    <td style="width:33px">CVE:</td>
                     <td>
                         {{ nvt['cves']|join(", ") }}
                     </td>
@@ -60,13 +60,13 @@
                 {% endif %}
                 {% if nvt['certs'] -%}
                 <tr>
-                    <td>Certs:</td>
+                    <td style="width:33px">Certs:</td>
                     <td>{{ nvt['certs']|join(", ") }}</td>
                 </tr>
                 {% endif %}
                 {% if nvt['references'] -%}
                 <tr>
-                    <td>Other:</td>
+                    <td style="width:33px">Other:</td>
                     <td>
                         {% for ref in nvt.references %}
                             <p><a href={{ ref }} target="_blank">{{ ref }}</a></p>
