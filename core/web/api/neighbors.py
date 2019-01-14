@@ -8,6 +8,7 @@ from core.web.api.crud import CrudApi
 from core.entities import Entity, Malware, TTP, Actor, ExploitKit, Exploit, Campaign
 from core.observables import Observable
 from core.indicators import Indicator, Yara, Regex
+from core.vulscan import Vulscan
 from core.web.helpers import requires_permissions
 
 NODES_CLASSES = {
@@ -22,6 +23,7 @@ NODES_CLASSES = {
     'exploitkit': ExploitKit,
     'regex': Regex,
     'yara': Yara,
+    'vulscan': Vulscan
 }
 
 

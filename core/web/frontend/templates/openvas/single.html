@@ -9,11 +9,11 @@
 {% import "macros/openvas.html" as openvas %}
 
 {% block title %}
-{{obj.name or 'Unnamed Investigation'}}
+{{obj.name}}
 {% endblock %}
 
 {% block main %}
-{% set investigation = obj %}
+{% set vulscan = obj %}
 <div class="row">
     <!-- start first column -->
     <div class="col-md-9">
@@ -24,20 +24,20 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h3 class="panel-title">
-                            {{investigation.name or 'Unnamed Investigation'}}
-                            <a href="{{url_for('frontend.InvestigationView:edit', id=investigation.id)}}"
+                            {{vulscan.name}}
+                            <a href="{{url_for('frontend.VulscanView:edit', id=vulscan.id)}}"
                                class="btn btn-default btn-xs pull-right"><span class="glyphicon glyphicon-pencil"
                                                                                aria-hidden="true"></span> Edit</a>
-                            <a href="{{url_for('frontend.InvestigationView:delete', id=investigation.id)}}"
+                            <a href="{{url_for('frontend.VulscanView:delete', id=vulscan.id)}}"
                                class="btn btn-danger btn-xs pull-right object-delete"
                                onclick="return confirm('Are you sure?')"><span class="glyphicon glyphicon-remove"
                                                                                aria-hidden="true"></span> Delete</a>
-                            <a href="{{url_for('frontend.InvestigationView:graph', id=investigation.id)}}"
+                            <a href="{{url_for('frontend.InvestigationView:graph_node', id=vulscan.id,klass='vulscan')}}"
                                class="btn btn-default btn-xs pull-right"><i class="flaticon-network38"></i> Go To Graph</a>
                         </h3>
 
                     </div>
-                    <div id="investigation_description" class="panel-body markdown-text">{% if investigation._fields %}{{investigation.description}}{%else%}No description provided{%endif%}
+                    <div id="investigation_description" class="panel-body markdown-text">{% if vulscan._fields %}{{vulscan.description}}{%else%}No description provided{%endif%}
                     </div>
                 </div>
             </div>
@@ -57,9 +57,9 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for result in investigation.results %}
+                    {% for result in vulscan.results %}
                     <tr>
-                        <td><a href="{{ url_for("frontend.OpenvasView:result", id=investigation['id'], name=macros.format_url(result['name']))}}">{{result.name}}</a></td>
+                        <td><a href="{{ url_for("frontend.OpenvasView:result", id=vulscan['id'], name=macros.format_url(result['name']))}}">{{result.name}}</a></td>
                         <td>{{ openvas.display_threatbar(result.threat,result.severity) }}</td>
                         <td>{{result.qod}}%</td>
                         <!--<td><a href="{{url_for("frontend.OpenvasView:filter", field='hosts', value=result['host'])}}">{{result.host}}</a></td>-->
@@ -83,26 +83,26 @@
             </div>
             <div class="panel-body">
                 <table class="table table-condensed main-table">
-                    {% set items=investigation.info().items()%}
-                    <tr><th><h5>Investigation info</h5></th></tr>
+                    {% set items=vulscan.info().items()%}
+                    <tr><th><h5>Vulscan info</h5></th></tr>
                     {% for key, value in items %}
                     {% if key in ["created_by", "created", "updated"] %}
                     <tr>
                         <th>{{macros.format_name(key)}}</th>
-                        <td>{{macros.display_yeti(investigation, key)}}</td>
+                        <td>{{macros.display_yeti(vulscan, key)}}</td>
                     </tr>
                     {% endif %}
                     {% endfor %}
                     <tr><th><br><h5>Scan info</h5></th><td></td></tr>
                     {% for key, value in items %}
-                    {% if key not in ["created_by", "created", "updated", "_id", "results", "_cls", "description", "oid", "links", "nodes", "events","name", "import_document", "import_text", "import_md", "ports", "severity"] %}
+                    {% if key not in ["created_by", "created", "updated", "_id", "results", "_cls", "description", "oid","attached_files","name", "ports", "severity"] %}
                     <tr>
                         <th>{{macros.format_name(key)}}</th>
                         {% if key not in ["hosts", "ports"] %}
-                        <td>{{macros.display_yeti(investigation, key)}}</td>
+                        <td>{{macros.display_yeti(vulscan, key)}}</td>
                         {% else %}
                         <td>
-                        {% for value in investigation[key]%}
+                        {% for value in vulscan[key]%}
                             <div>{{value}}</div>
                         {% endfor %}
                         </td>
@@ -113,7 +113,7 @@
                     <tr>
                         <th>Severity</th>
                         <td>
-                            {{openvas.display_threatbar(openvas.get_threat(investigation['severity']),investigation['severity'] )}}
+                            {{openvas.display_threatbar(openvas.get_threat(vulscan['severity']),vulscan['severity'] )}}
                         </td>
                     </tr>
                 </table>
@@ -125,115 +125,148 @@
 </div><!-- end row -->
 
 <div class="row">
-    <div class="col-md-12">
+  <div class="col-md-12">
 
-        {% set link_write = current_user.has_permission("link", "write") %}
-        {% set indicator_write = current_user.has_permission("indicator", "write") %}
-        {% set indicator_read = current_user.has_permission("indicator", "read") %}
-        {% set entity_write = current_user.has_permission("entity", "write") %}
-        {% set entity_read = current_user.has_permission("entity", "read") %}
-        {% set observable_read = current_user.has_permission("observable", "read") %}
+    {% set link_write = current_user.has_permission("link", "write") %}
+    {% set indicator_write = current_user.has_permission("indicator", "write") %}
+    {% set indicator_read = current_user.has_permission("indicator", "read") %}
+    {% set entity_write = current_user.has_permission("entity", "write") %}
+    {% set entity_read = current_user.has_permission("entity", "read") %}
+    {% set observable_read = current_user.has_permission("observable", "read") %}
+    {% set observable_write = current_user.has_permission("observable", "write") %}
 
 
-        <ul class="nav nav-tabs" role="tablist">
-            {% if indicator_read %}
-            <li role="presentation"><a href="#indicators" aria-controls="indicators" role="tab" data-toggle="tab">Indicators</a>
-            </li>
-            {%endif%}
-            {% if observable_read %}
-            <li role="presentation" class="active"><a href="#observables" aria-controls="observables" role="tab"
-                                                      data-toggle="tab">Observables</a></li>
-            {%endif%}
-            {% if entity_read %}
-            <li role="presentation"><a href="#ttp" aria-controls="ttp" role="tab" data-toggle="tab">TTP</a></li>
-            <li role="presentation"><a href="#malware" aria-controls="malware" role="tab" data-toggle="tab">Malware</a>
-            </li>
-            <li role="presentation"><a href="#actors" aria-controls="actors" role="tab" data-toggle="tab">Actors</a>
-            </li>
-            <li role="presentation"><a href="#companies" aria-controls="companies" role="tab" data-toggle="tab">Companies</a>
-            </li>
-            {%endif%}
-        </ul>
+    <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation" class="active"><a href="#ttp" aria-controls="ttp" role="tab" data-toggle="tab">TTP</a></li>
+      <li role="presentation"><a href="#malware" aria-controls="malware" role="tab" data-toggle="tab">Malware</a></li>
+      <li role="presentation"><a href="#actors" aria-controls="actors" role="tab" data-toggle="tab">Actors</a></li>
+      <li role="presentation"><a href="#campaigns" aria-controls="campaigns" role="tab" data-toggle="tab">Campaigns</a></li>
+      <li role="presentation"><a href="#exploits" aria-controls="exploits" role="tab" data-toggle="tab">Exploits</a></li>
+      <li role="presentation"><a href="#exploitkits" aria-controls="exploitkits" role="tab" data-toggle="tab">ExploitKits</a></li>
+      {% if indicator_read %}
+      <li role="presentation"><a href="#indicators" aria-controls="indicators" role="tab" data-toggle="tab">Indicators</a></li>
+      {% endif %}
+      {% if observable_read %}
+      <li role="presentation"><a href="#observables" aria-controls="observables" role="tab" data-toggle="tab">Observables</a></li>
+      {% endif %}
+    </ul>
 
-        <div class="tab-content">
+    <div class="tab-content">
 
-            {% if indicator_read %}
-            <div role="tabpanel" class="tab-pane" id="indicators">
-                <div class="row">
-                    <div class="col-md-12">
-                        {% with nav_style="nav-pills", data=investigation.nodes|selectattr("_cls", "startswith",
-                        "Indicator") %}
-                        {% include "indicator_api.html" %}
-                        {% endwith %}
-                    </div>
-                </div>
+        <div role="tabpanel" class="tab-pane active" id="ttp"> <!-- TTP tab -->
+          <div class="row">
+            <div class="col-md-12">
+              {{ filterlist.inline_filter(url_for("api.Neighbors:tuples", klass="vulscan", node_id=vulscan.id, type_filter="ttp"), "ttp-pivot") }}
+              {% if link_write and entity_write %}
+                <a href="{{ url_for('frontend.EntityView:new_subclass', subclass="ttp", bind=obj.id, type=obj.type.lower()) }}" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Bind new TTP</a>
+                {{ macros.table_controls("ttp") }}
+              {% endif %}
             </div>
-            {%endif%}
-
-            {% if observable_read %}
-            <div role="tabpanel" class="tab-pane active" id="observables">
-                <div class="row">
-                    <div class="col-md-12">
-                        {% with data=investigation.nodes|selectattr("_cls", "startswith", "Observable") %}
-                        {% include "observable_api.html" %}
-                        {% endwith %}
-                    </div>
-                </div>
-            </div>
-            {%endif%}
-
-            {% if entity_read %}
-            <div role="tabpanel" class="tab-pane" id="ttp">
-                <div class="row">
-                    <div class="col-md-12">
-                        {% with data=investigation.nodes|selectattr("_cls", "equalto", "Entity.TTP") %}
-                        {% include "entity_api.html" %}
-                        {% endwith %}
-                    </div>
-                </div>
-            </div>
-
-            <div role="tabpanel" class="tab-pane" id="malware">
-                <div class="row">
-                    <div class="col-md-12">
-                        {% with data=investigation.nodes|selectattr("_cls", "equalto", "Entity.Malware") %}
-                        {% include "entity_api.html" %}
-                        {% endwith %}
-                    </div>
-                </div>
-            </div>
-
-            <div role="tabpanel" class="tab-pane" id="actors">
-                <div class="row">
-                    <div class="col-md-12">
-                        {% with data=investigation.nodes|selectattr("_cls", "equalto", "Entity.Actor") %}
-                        {% include "entity_api.html" %}
-                        {% endwith %}
-                    </div>
-                </div>
-            </div>
-
-            <div role="tabpanel" class="tab-pane" id="companies">
-                <div class="row">
-                    <div class="col-md-12">
-                        {% with data=investigation.nodes|selectattr("_cls", "equalto", "Entity.Company") %}
-                        {% include "entity_api.html" %}
-                        {% endwith %}
-                    </div>
-                </div>
-            </div>
-            {%endif%}
-
+          </div>
         </div>
+
+        <div role="tabpanel" class="tab-pane" id="malware"> <!-- malware tab -->
+          <div class="row">
+            <div class="col-md-12">
+              {{ filterlist.inline_filter(url_for("api.Neighbors:tuples", klass="vulscan", node_id=vulscan.id, type_filter="malware"), "malware-pivot") }}
+              {% if link_write and entity_write %}
+              <a href="{{ url_for('frontend.EntityView:new_subclass', subclass="malware", bind=obj.id, type=obj.type.lower()) }}" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Bind new Malware</a>
+              {{ macros.table_controls("malware") }}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="actors"> <!-- actors tab -->
+          <div class="row">
+            <div class="col-md-12">
+              {{ filterlist.inline_filter(url_for("api.Neighbors:tuples", klass="vulscan", node_id=vulscan.id, type_filter="actor"), "actor-pivot") }}
+              {% if link_write and entity_write %}
+              <a href="{{ url_for('frontend.EntityView:new_subclass', subclass="actor", bind=obj.id, type=obj.type.lower()) }}" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Bind new Actor</a>
+              {{ macros.table_controls("actors") }}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="campaigns"> <!-- campaigns tab -->
+          <div class="row">
+            <div class="col-md-12">
+              {{ filterlist.inline_filter(url_for("api.Neighbors:tuples", klass="vulscan", node_id=vulscan.id, type_filter="campaign"), "campaign-pivot") }}
+              {% if link_write and entity_write %}
+              <a href="{{ url_for('frontend.EntityView:new_subclass', subclass="campaign", bind=obj.id, type=obj.type.lower()) }}" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Bind new Campaign</a>
+              {{ macros.table_controls("campaigns") }}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="exploits"> <!-- exploits tab -->
+          <div class="row">
+            <div class="col-md-12">
+              {{ filterlist.inline_filter(url_for("api.Neighbors:tuples", klass="vulscan", node_id=vulscan.id, type_filter="exploit"), "exploit-pivot") }}
+              {% if link_write and entity_write %}
+              <a href="{{ url_for('frontend.EntityView:new_subclass', subclass="exploit", bind=obj.id, type=obj.type.lower()) }}" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Bind new Exploit</a>
+              {{ macros.table_controls("exploits") }}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="exploitkits"> <!-- exploitkits tab -->
+          <div class="row">
+            <div class="col-md-12">
+              {{ filterlist.inline_filter(url_for("api.Neighbors:tuples", klass="vulscan", node_id=vulscan.id, type_filter="exploitkit"), "exploitkit-pivot") }}
+              {% if link_write and entity_write %}
+              <a href="{{ url_for('frontend.EntityView:new_subclass', subclass="exploitkit", bind=obj.id, type=obj.type.lower()) }}" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Bind new ExploitKit</a>
+              {{ macros.table_controls("exploitkits") }}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        {% if indicator_read %}
+        <div role="tabpanel" class="tab-pane" id="indicators"> <!-- indicators tab -->
+          <div class="row">
+            <div class="col-md-12">
+              {{ filterlist.inline_filter(url_for("api.Neighbors:tuples", klass="vulscan", node_id=vulscan.id, type_filter="indicator"), "indicator-pivot") }}
+              {% if link_write and indicator_write %}
+              <a href="{{ url_for('frontend.IndicatorView:new_subclass', subclass="regex", bind=obj.id, type=obj.type.lower()) }}" class="btn btn-default btn-xs pull-left"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Bind new Regex</a>
+              {{ macros.table_controls("indicators") }}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if observable_read %}
+        <div role="tabpanel" class="tab-pane" id="observables"> <!-- Observables tab -->
+          <div class="row">
+            <div class="col-md-12">
+              {{ filterlist.inline_filter(url_for("api.Neighbors:tuples", klass="vulscan", node_id=vulscan.id, type_filter="observable"), "observable-pivot", default_key="value") }}
+              {% if link_write and observable_write %}
+              {{ macros.table_controls("observables") }}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
     </div>
+  </div>
 </div>
 
+<script type="text/javascript">
+  for (let type of ["indicators", "ttp", "malware", "actors", "campaigns", "exploits", "exploitkits", "observables"]) {
+    var s = new GenericSelector("#"+type, ".node-line", "#"+type+"-multiple-actions");
+    s.bindCallback(".btn-unlink", unlink);
+    s.bindCallback(".btn-edit", edit);
+  }
+</script>
 
 {% endblock %}
 
 {% block custom_head %}
-<script type="text/javascript" src="{{ url_for('frontend.static', filename='yeti/js/crud.js') }}"
-        charset="utf-8"></script>
-<script type="text/javascript" src="{{ url_for('frontend.static', filename='yeti/js/import.js') }}"
-        charset="utf-8"></script>
+<script type="text/javascript" src="{{ url_for('frontend.static', filename='yeti/js/crud.js') }}" charset="utf-8"></script>
+<script type="text/javascript" src="{{ url_for('frontend.static', filename='yeti/js/selection.js') }}" charset="utf-8"></script>
 {%endblock%}

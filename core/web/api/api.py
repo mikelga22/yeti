@@ -39,6 +39,7 @@ from core.web.api.links import Link
 from core.web.api.attached_files import AttachedFiles
 from core.web.api.file import File
 from core.web.api.useradmin import UserAdminSearch
+from core.web.api.vulscan import VulscanSearch,Vulscan
 
 Analysis.register(api)
 
@@ -51,6 +52,9 @@ Observable.register(api)
 
 IndicatorSearch.register(api)
 Indicator.register(api)
+
+VulscanSearch.register(api)
+Vulscan.register(api)
 
 EntitySearch.register(api)
 Entity.register(api)

@@ -60,13 +60,7 @@ class Investigation(YetiDocument):
     # Ignore extra fields
     meta = {'strict': False, 'allow_inheritance': True}
 
-    @property
-    def type(self):
-        return self._cls.split(".")[-1]
 
-    @property
-    def full_type(self):
-        return self._cls
     #-----------------------------------------------------------------
 
     @classmethod

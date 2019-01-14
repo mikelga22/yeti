@@ -5,7 +5,7 @@ from mongoengine import *
 from flask_mongoengine.wtf import model_form
 from core.database import YetiDocument, AttachedFile
 from flask import url_for
-from core.investigation import Investigation
+from core.vulscan import Vulscan
 import xml.etree.ElementTree as ET
 from datetime import datetime
 import re
@@ -111,22 +111,21 @@ class Nvt(YetiDocument):
         return result
 
 
-class Openvas (Investigation):
+class Openvas(Vulscan):
     oid=StringField(verbose_name="OID")
-    name=StringField(verbose_name="Name")
-    report_date=DateTimeField(verbose_name="Date of report")
     hosts=ListField(verbose_name="Host")
     ports=ListField(verbose_name="Ports")
     results_count=IntField(verbose_name="Rresults count")
     severity=DecimalField(verbose_name="Severity")
     results=ListField(EmbeddedDocumentField(Result), verbose_name="Results")
 
-    exclude_fields = Investigation.exclude_fields+['report_date','hosts','ports','results_count','severity','results','oid']
+    exclude_fields = ['scan_date','hosts','ports','results_count','severity','results','oid']
 
     def create(self, form, f):
         file = ET.parse(f)
         report = file.getroot().find('report')
         self.created_by=form.get('created_by')
+        self.scanner=form.get('scanner')
         self.description=form.get('description')
         self.oid=file.getroot().attrib.values()[3]
         if form.get('name'):
@@ -172,3 +171,4 @@ class Openvas (Investigation):
             list.append(result)
 
         self.results=list
+

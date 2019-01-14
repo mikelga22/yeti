@@ -16,6 +16,10 @@ DEFAULT_PERMISSIONS = {
         "toggle": True,
         "refresh": True
     },
+    "vulscan":{
+        "read": True,
+        "write": True
+    },
     "observable": {
         "read": True,
         "write": True,

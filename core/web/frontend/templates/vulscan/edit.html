@@ -2,13 +2,13 @@
 {% import "macros/generic.html" as macros %}
 
 {% block title %}
-{% if not obj %}Import Openvas report{% else %}Editing {{obj.name}}{%endif%}
+{% if not obj %}Import Vulscan file{% else %}Editing {{obj.name}}{%endif%}
 {% endblock %}
 
 {% block breadcrumb %}
 <ol class="breadcrumb">
 	<li>YETI</li>
-  <li><a href="{{url_for('frontend.InvestigationView:index')}}">Investigations</a></li>
+  <li><a href="{{url_for('frontend.VulscanView:index')}}">Vulscans</a></li>
 	<li class="active">Edit</li>
 </ol>
 {% endblock %}
@@ -31,9 +31,9 @@
     <div class="row">
       <div class="col-md-10 col-md-offset-1">
 				{% if not obj %}
-					<h1>Import Openvas report</h1>
+					<h1>Import Vulscan file</h1>
 				{% else %}
-        	<h1>Editing {{obj.name or "Unnamed investigation"}}</h1>
+        	<h1>Editing {{obj.name}}</h1>
 				{% endif %}
       </div>
       <div class="form-content">
@@ -49,7 +49,7 @@
                   <div class="form-group ">
                       <p class="help-block">Select the xml file of the report to import it.
                       </p>
-                      <input name="openvas-file" type="file" accept=".xml">
+                      <input name="vulscan-file" type="file" accept=".xml">
                   </div>
                   <!------------------------------------------------------------------->
 

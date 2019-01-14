@@ -11,7 +11,6 @@ from core.database import AttachedFile
 from core.web.helpers import get_object_or_404
 from core.web.helpers import requires_permissions
 
-from core.openvas.import_file import import_file
 
 binding_object_classes = {
     "malware": Malware,

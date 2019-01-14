@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% import "macros/filterlist.html" as filterlist %}
+
+{% block title %}
+Entities
+{% endblock %}
+
+{% block breadcrumb %}
+<ol class="breadcrumb">
+	<li>YETI</li>
+	<li class="active">Entities</li>
+</ol>
+{% endblock %}
+
+{% block main %}
+<ul class="nav nav-tabs" role="tablist">
+  <li role="presentation" class="active"><a href="#saved" aria-controls="saved" role="tab" data-toggle="tab">Saved Vulscans</a></li>
+</ul>
+
+<div class="tab-content">
+
+  <div role="tabpanel" class="tab-pane active" id="saved">
+      {{ filterlist.sidebar_filter(url_for('api.VulscanSearch:post'), "saved_vulscans", name__exists=True, order_by="-updated") }}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block custom_head %}
+<script type="text/javascript" src="{{ url_for('frontend.static', filename='yeti/js/crud.js') }}" charset="utf-8"></script>
+{%endblock%}
