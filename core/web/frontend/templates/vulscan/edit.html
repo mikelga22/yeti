@@ -49,10 +49,12 @@
                             {{ macros.render_generic_errors(form) }}
                         </div>
                         <div class="col-md-3 col-md-offset-1">
-                            {{ macros.render_field(form.name) }}
+                            {% for field in form if field.name != 'description' %}
+                                {{ macros.render_field(field) }}
+                            {% endfor %}
+
 
                             {% if not obj %}
-                                {{ macros.render_field(form.scanner) }}
                                 <!---------------Upload document--------------------------------------------------->
                                 <div class="form-group ">
                                     <p class="help-block">Select the file to import.
