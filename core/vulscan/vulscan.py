@@ -4,6 +4,8 @@ from mongoengine import StringField, DateTimeField
 from datetime import datetime
 from flask_mongoengine.wtf import model_form
 from flask import url_for
+from core.errors import ImportVulscanError, NoImportFile
+from mongoengine import NotUniqueError
 
 from core.database import Node, TagListField, EntityListField
 from core.observables import Tag
@@ -20,9 +22,9 @@ class Vulscan(Node):
 
     exclude_fields = Node.exclude_fields + ["scan_date", "created", "updated", "created_by"]
 
-    name = StringField(verbose_name="Name", max_length=1024)
+    name = StringField(verbose_name="Name", unique=True, max_length=1024)
     description = StringField(verbose_name="Description")
-    created_by = StringField(verbose_name="Created By")
+    #created_by = StringField(verbose_name="Created By")
     created = DateTimeField(default=datetime.utcnow)
     updated = DateTimeField(default=datetime.utcnow)
     scan_date = DateTimeField(verbose_name="Scan date")
@@ -43,3 +45,9 @@ class Vulscan(Node):
         result = self.to_mongo()
 
         return result
+
+    def import_file(self, form, file):
+        pass
+
+    def extract_observables(self):
+        pass

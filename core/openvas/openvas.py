@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
-import re
+from core.errors import ImportVulscanError, NoImportFile
+from mongoengine import NotUniqueError
 from mongoengine import *
 from flask_mongoengine.wtf import model_form
 from core.database import YetiDocument, AttachedFile
@@ -119,12 +120,27 @@ class Openvas(Vulscan):
     severity=DecimalField(verbose_name="Severity")
     results=ListField(EmbeddedDocumentField(Result), verbose_name="Results")
 
-    exclude_fields = ['scan_date','hosts','ports','results_count','severity','results','oid']
+    exclude_fields = Vulscan.exclude_fields+['scan_date','hosts','ports','results_count','severity','results','oid']
+
+    def import_file(self,form,file):
+        if (not file):
+            raise NoImportFile("No file found")
+        try:
+            self.create(form, file)
+            self.save(validate=False)
+            return self
+
+        except NotUniqueError as e:
+            raise NotUniqueError()
+
+        except Exception as e:
+            raise ImportVulscanError("Error importing file")
+
 
     def create(self, form, f):
         file = ET.parse(f)
         report = file.getroot().find('report')
-        self.created_by=form.get('created_by')
+        #self.created_by=form.get('created_by')
         self.scanner=form.get('scanner')
         self.description=form.get('description')
         self.oid=file.getroot().attrib.values()[3]

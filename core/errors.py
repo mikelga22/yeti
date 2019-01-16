@@ -31,3 +31,11 @@ class EntityValidationError(GenericValidationError):
 
 class TagValidationError(GenericYetiError):
     pass
+
+
+# Importing errors
+class ImportVulscanError(GenericYetiError):
+    pass
+
+class NoImportFile(GenericYetiError):
+    pass
