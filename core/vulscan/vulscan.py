@@ -7,7 +7,7 @@ from flask import url_for
 from core.errors import ImportVulscanError, NoImportFile
 from mongoengine import NotUniqueError
 
-from core.database import Node, TagListField, EntityListField
+from core.database import Node, YetiDocument, TagListField, EntityListField
 from core.observables import Tag
 
 
@@ -51,3 +51,7 @@ class Vulscan(Node):
 
     def extract_observables(self):
         pass
+
+class Result(YetiDocument):
+
+    meta = {"allow_inheritance": True}

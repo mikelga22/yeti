@@ -6,21 +6,21 @@ from mongoengine import *
 from flask_mongoengine.wtf import model_form
 from core.database import YetiDocument, AttachedFile
 from flask import url_for
-from core.vulscan import Vulscan
+from core.vulscan import Vulscan, Result
 import xml.etree.ElementTree as ET
 from datetime import datetime
 import re
 
 
-class Result(EmbeddedDocument):
-    name=StringField()
-    port=StringField()
-    host=StringField()
-    threat=StringField()
-    severity=DecimalField()
-    qod=IntField()
-    description=StringField()
-    nvt=ReferenceField('Nvt')
+class Result(Result):
+    name=StringField(verbose_name="Name")
+    port=StringField(verbose_name="Port")
+    host=StringField(verbose_name="Host")
+    threat=StringField(verbose_name="Threat")
+    severity=DecimalField(verbose_name="Severity")
+    qod=IntField(verbose_name="QoD")
+    description=StringField(verbose_name="Description")
+    nvt=ReferenceField('Nvt',verbose_name="Nvt")
 
 
     def create(self, res):
@@ -33,8 +33,13 @@ class Result(EmbeddedDocument):
         self.description=res.find('description').text if res.find('description') is not None else None
         self.description=self.description.split('\n') if self.description is not None else None
         self.nvt=Nvt().create(res.find('nvt')).id
+        try:
+            obj=self.save(validate=False)
+        except Exception as e:
+            print(e)
 
-        return self
+
+        return obj
 
     def info(self):
         result = self.to_mongo()
@@ -118,15 +123,15 @@ class Openvas(Vulscan):
     ports=ListField(verbose_name="Ports")
     results_count=IntField(verbose_name="Rresults count")
     severity=DecimalField(verbose_name="Severity")
-    results=ListField(EmbeddedDocumentField(Result), verbose_name="Results")
+    results=ListField(ReferenceField('Result',verbose_name="Results"))
 
     exclude_fields = Vulscan.exclude_fields+['scan_date','hosts','ports','results_count','severity','results','oid']
 
-    def import_file(self,form,file):
+    def import_file(self,file):
         if (not file):
             raise NoImportFile("No file found")
         try:
-            self.create(form, file)
+            self.create(file)
             self.save(validate=False)
             return self
 
@@ -137,16 +142,12 @@ class Openvas(Vulscan):
             raise ImportVulscanError("Error importing file")
 
 
-    def create(self, form, f):
+    def create(self, f):
         file = ET.parse(f)
         report = file.getroot().find('report')
         #self.created_by=form.get('created_by')
-        self.scanner=form.get('scanner')
-        self.description=form.get('description')
         self.oid=file.getroot().attrib.values()[3]
-        if form.get('name'):
-            self.name=form.get('name')
-        else:
+        if not self.name:
             self.name = 'Openvas({})'.format(file.getroot().find('name').text)
         self.report_date = datetime.strptime(file.getroot().find('creation_time').text,'%Y-%m-%dT%H:%M:%SZ')
         self.results_count = report.find('result_count').find('filtered').text

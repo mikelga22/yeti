@@ -9,7 +9,7 @@ from mongoengine import NotUniqueError
 
 from core.web.frontend.generic import GenericView
 from core.vulscan import Vulscan
-from core.vulscan.import_file import import_file
+from core.openvas import Openvas
 from core.web.helpers import get_queryset
 from core.web.api.crud import CrudSearchApi
 from core.web.helpers import requires_permissions
@@ -18,6 +18,9 @@ from core.web.helpers import requires_permissions
 class VulscanView(GenericView):
 
     klass=Vulscan
+    scanner_map = {
+        "openvas": Openvas
+    }
 
     @requires_permissions("read","vulscan")
     #@route('/result/<id>/<string:name>', methods=["GET", "POST"])
@@ -46,6 +49,7 @@ class VulscanView(GenericView):
         update=False;
 
         if klass:  # create
+            klass = self.scanner_map.get(request.form.get('scanner'))
             obj = klass()
             form = klass.get_form()(request.form)
         else:  # update
@@ -59,7 +63,7 @@ class VulscanView(GenericView):
             try:
                 self.pre_validate(obj, request)
                 if(not update):
-                    obj = import_file(request.form, request.files.get('vulscan-file'))
+                    obj = obj.import_file(request.files.get('vulscan-file'))
                 else:
                     ob=obj.save(validate=False)
                 self.post_save(obj, request)

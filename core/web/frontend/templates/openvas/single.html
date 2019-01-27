@@ -59,10 +59,10 @@
                     <tbody>
                     {% for result in vulscan.results %}
                     <tr>
-                        <td><a href="{{ url_for("frontend.OpenvasView:result", id=vulscan['id'], name=macros.format_url(result['name']))}}">{{result.name}}</a></td>
+                        <td><a href="{{ url_for("frontend.OpenvasView:result", id=result['id'])}}">{{result.name}}</a></td>
                         <td>{{ openvas.display_threatbar(result.threat,result.severity) }}</td>
                         <td>{{result.qod}}%</td>
-                        <!--<td><a href="{{url_for("frontend.OpenvasView:filter", field='hosts', value=result['host'])}}">{{result.host}}</a></td>-->
+{#                        <td><a href="{{url_for("frontend.OpenvasView:filter", field='hosts', value=result['host'])}}">{{result.host}}</a></td>#}
                         <td>{{result.host}}</td>
                         <td>{{result.port}}</td>
                     </tr>
