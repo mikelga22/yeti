@@ -59,7 +59,8 @@ class Entity(Node):
         if override:
             klass = override
         form = model_form(klass, exclude=klass.exclude_fields)
-
+        form.tags = TagListField("Tags that will link to this entity")
+        form.links = EntityListField("Bind to entities")
 
         return form
 
