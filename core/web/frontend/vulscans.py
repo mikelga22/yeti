@@ -10,6 +10,8 @@ from mongoengine import NotUniqueError
 from core.web.frontend.generic import GenericView
 from core.vulscan import Vulscan
 from core.openvas import Openvas
+from core.database import AttachedFile
+from core.web.helpers import get_object_or_404
 from core.web.helpers import get_queryset
 from core.web.api.crud import CrudSearchApi
 from core.web.helpers import requires_permissions
@@ -47,6 +49,12 @@ class VulscanView(GenericView):
 
     def post_save(self, o, request):
         o.save_observables()
+
+        f = AttachedFile.from_upload(request.files['vulscan-file'])
+        if f:
+            f.attach(o)
+        return redirect(
+            url_for('frontend.{}:get'.format(self.__class__.__name__), id=o.id))
 
     def handle_form(self, id=None, klass=None, skip_validation=False):
         update=False;

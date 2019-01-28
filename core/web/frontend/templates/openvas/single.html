@@ -120,6 +120,31 @@
             </div>
         </div>
 
+
+        <div class="panel panel-primary yeti-panel">
+            <div class="panel-heading">
+                <h3 class="panel-title">Files</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table table-condensed">
+                    {% for f in vulscan.attached_files %}
+                        <tr class="node-line">
+                            <td class='icon-cell'>
+                                <a href="{{ url_for("api.Vulscan:file_content", sha256=f.sha256) }}">
+                                    <i class="fa fa-download" aria-hidden="true"></i>
+                                </a>
+                            </td>
+
+                            <td>{{ f.filename }}</td>
+                        </tr>
+                    {% else %}
+                        No files for now.
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+
     </div> <!-- end second column -->
 
 </div><!-- end row -->
