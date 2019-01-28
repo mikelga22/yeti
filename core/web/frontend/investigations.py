@@ -14,6 +14,7 @@ from core.database import AttachedFile
 from core.entities import Entity
 from core.indicators import Indicator
 from core.observables import Observable
+from core.vulscan import Vulscan
 
 from core.web.api.api import bson_renderer
 
@@ -37,6 +38,8 @@ class InvestigationView(GenericView):
             node = get_object_or_404(Entity, id=id)
         elif klass == 'indicator':
             node = get_object_or_404(Indicator, id=id)
+        elif klass == 'vulscan':
+            node=get_object_or_404(Vulscan, id=id)
         else:
             node = get_object_or_404(Observable, id=id)
 

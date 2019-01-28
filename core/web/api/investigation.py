@@ -12,6 +12,7 @@ from core.web.api.crud import CrudApi, CrudSearchApi
 from core.observables import *
 from core.investigation import ImportResults
 from core.entities import Entity
+from core.vulscan import Vulscan
 from core.web.api.api import render
 from core.web.helpers import get_object_or_404
 from core.web.helpers import requires_permissions, get_queryset
@@ -73,8 +74,9 @@ class Investigation(CrudApi):
 
         observables = Observable.objects(value=query).limit(5)
         entities = Entity.objects(name=query).limit(5)
+        vulscans = Vulscan.objects(name=query).limit(5)
 
-        for results in [observables, entities]:
+        for results in [observables, entities, vulscans]:
             for node in results:
                 result.append(node.to_mongo())
 

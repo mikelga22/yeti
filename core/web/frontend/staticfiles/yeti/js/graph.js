@@ -40,6 +40,7 @@ var icons = {
   'Entity.Actor': flaticon('\ue017'),
   'Entity.Campaign': flaticon('\ue003'),
   'Indicator.Regex': flaticon('\ue015'),
+  'Vulscan.Openvas': flaticon('\ue021')
 };
 
 var cssicons = {
@@ -58,6 +59,7 @@ var cssicons = {
   'Entity.Campaign': 'flaticon-businessman116',
   'Entity.Actor': 'flaticon-malware',
   'Indicator.Regex': 'flaticon-magnifying-glass40',
+  'Vulscan.Openvas':'flaticon-text70'
 };
 
 //
