@@ -7,6 +7,7 @@ from flask_mongoengine.wtf import model_form
 from core.database import YetiDocument, AttachedFile
 from flask import url_for
 from core.vulscan import Vulscan, Result
+from core.observables import Ip
 import xml.etree.ElementTree as ET
 from datetime import datetime
 import re
@@ -133,6 +134,7 @@ class Openvas(Vulscan):
         try:
             self.create(file)
             self.save(validate=False)
+            self.extract_observables()
             return self
 
         except NotUniqueError as e:
@@ -158,6 +160,12 @@ class Openvas(Vulscan):
         self.extract_results(report.find('results'))
 
         return self
+
+    def extract_observables(self):
+        for host in self.hosts:
+            ip=Ip.get_or_create(value=host)
+            ip.active_link_to(self,"Scan","web interface")
+
 
     def extract_hosts(self,hosts):
         list=[]

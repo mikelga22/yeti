@@ -153,6 +153,24 @@
       </div>
     </div>
 
+    {% if observable.type=='Ip' %}
+    <div class="panel panel-warning yeti-panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">Related vulscans</h3>
+      </div>
+      <div class="panel-body">
+        <table class="table table-condensed">
+          {% set related_entities = observable.neighbors(neighbor_type="Vulscan") %}
+          {% for t, links in related_entities.items() %}
+            {% for link, entity in links %}
+            <tr><td><a href="{{url_for('frontend.VulscanView:get', id=entity.id)}}">{{entity.name}}</a></td><td>{{link.description}}</td></tr>
+            {% endfor %}
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
     <div class="panel panel-default yeti-panel">
       <div class="panel-heading">
         <h4 class="panel-title">Last analyses</h4>
