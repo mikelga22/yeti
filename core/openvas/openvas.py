@@ -134,7 +134,7 @@ class Openvas(Vulscan):
         try:
             self.create(file)
             self.save(validate=False)
-            self.extract_observables()
+
             return self
 
         except NotUniqueError as e:
@@ -161,7 +161,7 @@ class Openvas(Vulscan):
 
         return self
 
-    def extract_observables(self):
+    def save_observables(self):
         for host in self.hosts:
             ip=Ip.get_or_create(value=host)
             ip.active_link_to(self,"Scan","web interface")

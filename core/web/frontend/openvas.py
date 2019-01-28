@@ -5,7 +5,7 @@ from flask_login import current_user
 from flask import render_template, request, flash, redirect, url_for
 from mongoengine import DoesNotExist
 
-from core.web.frontend.vulscan import VulscanView
+from core.web.frontend.vulscans import VulscanView
 from core.vulscan import Vulscan, Result
 from core.web.helpers import get_queryset
 from core.web.api.crud import CrudSearchApi

@@ -9,7 +9,7 @@ from core.web.frontend.indicators import IndicatorView
 from core.web.frontend.investigations import InvestigationView
 from core.web.frontend.system import SystemView
 from core.web.frontend.actions import ActionsView
-from core.web.frontend.vulscan import VulscanView
+from core.web.frontend.vulscans import VulscanView
 from core.web.frontend.openvas import OpenvasView
 
 from core.observables import *

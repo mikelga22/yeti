@@ -45,6 +45,9 @@ class VulscanView(GenericView):
         return render_template(
         "{}/single.html".format(obj.type.lower()), obj=obj)
 
+    def post_save(self, o, request):
+        o.save_observables()
+
     def handle_form(self, id=None, klass=None, skip_validation=False):
         update=False;
 
@@ -117,30 +120,7 @@ class VulscanView(GenericView):
                 obj_type=klass.__name__,
                 obj=obj)
 
-    # @requires_permissions("write","vulscan")
-    # @route('/new', methods=["GET", "POST"])
-    # def new(self, klass=None):
-    #     klass=self.klass
-    #     if request.method == 'POST':
-    #         if(request.files.get('vulscan-file')):
-    #             try:
-    #                 obj=import_file(request.form, request.files.get('vulscan-file'))
-    #                 return redirect(
-    #                     url_for(
-    #                         'frontend.{}:get'.format(self.__class__.__name__),
-    #                         id=obj.id))
-    #             except:
-    #                 flash("Error processing file", "danger")
-    #         else:
-    #             flash("No file selected")
-    #
-    #     form = klass.get_form()()
-    #     obj = None
-    #     return render_template(
-    #         "{}/edit.html".format(self.klass.__name__.lower()),
-    #         form=form,
-    #         obj_type=klass.__name__,
-    #         obj=obj)
+
 
 
 

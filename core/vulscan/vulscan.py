@@ -49,7 +49,7 @@ class Vulscan(Node):
     def import_file(self, form, file):
         pass
 
-    def extract_observables(self):
+    def save_observables(self):
         pass
 
 class Result(YetiDocument):
