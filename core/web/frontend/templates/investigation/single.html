@@ -125,6 +125,7 @@
     {% set entity_write = current_user.has_permission("entity", "write") %}
     {% set entity_read = current_user.has_permission("entity", "read") %}
     {% set observable_read = current_user.has_permission("observable", "read") %}
+    {% set vulscan_read = current_user.has_permission("vulscan", "read") %}
 
 
     <ul class="nav nav-tabs" role="tablist">
@@ -139,6 +140,9 @@
       <li role="presentation"><a href="#malware" aria-controls="malware" role="tab" data-toggle="tab">Malware</a></li>
       <li role="presentation"><a href="#actors" aria-controls="actors" role="tab" data-toggle="tab">Actors</a></li>
       <li role="presentation"><a href="#companies" aria-controls="companies" role="tab" data-toggle="tab">Companies</a></li>
+      {%endif%}
+      {% if observable_read %}
+      <li role="presentation"><a href="#vulscan" aria-controls="vulscan" role="tab" data-toggle="tab">Vulscans</a></li>
       {%endif%}
     </ul>
 
@@ -209,6 +213,18 @@
           </div>
         </div>
         {%endif%}
+
+        {% if vulscan_read %}
+        <div role="tabpanel" class="tab-pane" id="vulscan">
+          <div class="row">
+            <div class="col-md-12">
+                {% with data=investigation.nodes|selectattr("_cls", "startswith", "Vulscan") %}
+                {% include "vulscan_api.html" %}
+                {% endwith %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
 
     </div>
   </div>

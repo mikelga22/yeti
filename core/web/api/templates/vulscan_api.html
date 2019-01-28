@@ -1,31 +1,34 @@
 {% import "macros/generic.html" as macros %}
 {% import "macros/filterlist.html" as filterlist %}
-{% set link_write = current_user.has_permission('link', 'write')%}
-{% if data|length > 0 %}
-<table class="table table-condensed yeti-table table-hover">
-  <tr>
-    <th><!-- graph icon column --></th>
-    <th>Name</th>
-    <th>Created</th>
-    <th>Updated</th>
-  </tr>
-  {% for obj in data %}
-  <tr class="node-line">
-    <td class="icon-cell">
-        <a href="{{ url_for('frontend.InvestigationView:graph_node', id=obj['id'], klass="vulscan") }}"><i class="flaticon-network38"></i></a>
-    </td>
-    <td>
-      <a href="{{ url_for("frontend.VulscanView:get", id=obj['id'])}}">
-        {{obj['name'] or 'Unnamed'}}
-      </a>
-    </td>
-    <td>{{macros.display_datetime(obj.created)}}</td>
-    <td>{{macros.display_datetime(obj.updated)}}</td>
-  </tr>
-  {% endfor %}
-</table>
-{% else %}
-<div class='no-results'>
-  No results found
-</div>
+{% set link_write = current_user.has_permission('link', 'write') %}
+{% for obj in data %}
+    {% if loop.first %}
+        <table class="table table-condensed yeti-table table-hover">
+        <tr>
+            <th><!-- graph icon column --></th>
+            <th>Name</th>
+            <th>Created</th>
+            <th>Updated</th>
+        </tr>
+    {% endif %}
+    <tr class="node-line">
+        <td class="icon-cell">
+            <a href="{{ url_for('frontend.InvestigationView:graph_node', id=obj['id'], klass="vulscan") }}"><i
+                    class="flaticon-network38"></i></a>
+        </td>
+        <td>
+            <a href="{{ url_for("frontend.VulscanView:get", id=obj['id']) }}">
+                {{ obj['name'] or 'Unnamed' }}
+            </a>
+        </td>
+        <td>{{ macros.display_datetime(obj.created) }}</td>
+        <td>{{ macros.display_datetime(obj.updated) }}</td>
+    </tr>
+{% if loop.last %}
+    </table>
 {% endif %}
+{% else %}
+    <div class='no-results'>
+        No results found
+    </div>
+{% endfor %}
