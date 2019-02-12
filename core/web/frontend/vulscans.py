@@ -1,9 +1,6 @@
 from __future__ import unicode_literals
 
-from flask_classy import route
-from flask_login import current_user
-from flask import render_template, request, flash, redirect, url_for, abort
-from mongoengine import DoesNotExist
+from flask import render_template, request, flash, redirect, url_for
 from core.errors import GenericValidationError, ImportVulscanError, NoImportFile
 from mongoengine import NotUniqueError
 
@@ -11,9 +8,6 @@ from core.web.frontend.generic import GenericView
 from core.vulscan import Vulscan
 from core.openvas import Openvas
 from core.database import AttachedFile
-from core.web.helpers import get_object_or_404
-from core.web.helpers import get_queryset
-from core.web.api.crud import CrudSearchApi
 from core.web.helpers import requires_permissions
 
 

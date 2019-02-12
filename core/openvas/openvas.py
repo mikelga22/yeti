@@ -1,11 +1,7 @@
 from __future__ import unicode_literals
 
 from core.errors import ImportVulscanError, NoImportFile
-from mongoengine import NotUniqueError
 from mongoengine import *
-from flask_mongoengine.wtf import model_form
-from core.database import YetiDocument, AttachedFile
-from flask import url_for
 from core.vulscan import Vulscan, Result
 from core.observables import Ip
 import xml.etree.ElementTree as ET
