@@ -25,9 +25,9 @@
     {% endif %}
 {%- endmacro %}
 
-{% macro display_info(nvt) -%}
-    {% set info=nvt.information %}
-    {% for key,value in nvt.DISPLAY_INFO %}
+{% macro display_info(result) -%}
+    {% set info=result.information %}
+    {% for key,value in result.DISPLAY_INFO %}
         {% if info[key] %}
             <tr>
                 <td>
@@ -38,37 +38,42 @@
                         {% endif %}
                     {% endif %}
                     <p>{{ display_field(info[key]) }}</p>
+                </td>
             </tr>
         {% endif %}
     {% endfor %}
 {%- endmacro %}
 
-{% macro display_references(nvt) -%}
+{% macro display_references(result) -%}
     <tr>
         <td>
             <b>References</b>
             <p></p>
             <table class="table table-sm borderless">
                 <tbody>
-                {% if nvt['cves'] -%}
+                {% if result['cves'] -%}
                 <tr>
                     <td style="width:33px">CVE:</td>
                     <td>
-                        {{ nvt['cves']|join(", ") }}
+{#                        {{ result['cves']|join(", ") }}#}
+                        {% for cve in result['cves']%}
+                            <a href="https://nvd.nist.gov/vuln/detail/{{ cve }}" target="_blank">{{ cve }}</a>
+                            {%- if loop.first %},{% endif %}
+                        {% endfor %}
                     </td>
                 </tr>
                 {% endif %}
-                {% if nvt['certs'] -%}
+                {% if result['certs'] -%}
                 <tr>
                     <td style="width:33px">Certs:</td>
-                    <td>{{ nvt['certs']|join(", ") }}</td>
+                    <td>{{ result['certs']|join(", ") }}</td>
                 </tr>
                 {% endif %}
-                {% if nvt['references'] -%}
+                {% if result['references'] -%}
                 <tr>
                     <td style="width:33px">Other:</td>
                     <td>
-                        {% for ref in nvt.references %}
+                        {% for ref in result.references %}
                             <p><a href={{ ref }} target="_blank">{{ ref }}</a></p>
                         {% endfor %}
                     </td>

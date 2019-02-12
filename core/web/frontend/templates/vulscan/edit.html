@@ -52,19 +52,13 @@
                             {% for field in form if field.name != 'description' %}
                                 {{ macros.render_field(field) }}
                             {% endfor %}
-
-
-                            {% if not obj %}
                                 <!---------------Upload document--------------------------------------------------->
                                 <div class="form-group ">
                                     <p class="help-block">Select the file to import.
                                     </p>
-                                    <input name="vulscan-file" type="file" accept="" required>
+                                    <input name="vulscan-file" type="file" accept="">
                                 </div>
                                 <!------------------------------------------------------------------->
-                            {% endif %}
-
-
                         </div>
                         <div class="col-md-7">
                             {{ macros.render_field(form.description, rows=12, class="form-control markdown") }}

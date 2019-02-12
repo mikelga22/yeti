@@ -13,15 +13,16 @@ from datetime import datetime
 import re
 
 
-class Result(Result):
-    name=StringField(verbose_name="Name")
-    port=StringField(verbose_name="Port")
-    host=StringField(verbose_name="Host")
+class OpenvasResult(Result):
+
+    DISPLAY_INFO = [("description", "Description"),("summary", "Summary"), ("impact", "Impact"), ("affected", "Affected Software/OS"),("insight", "Vulnerability Insight"), ("insight", "Vulnerability insight"),("solution", "Solution"), ("vuldetect", "Vulnerability detection method")]
+
     threat=StringField(verbose_name="Threat")
     severity=DecimalField(verbose_name="Severity")
     qod=IntField(verbose_name="QoD")
-    description=StringField(verbose_name="Description")
-    nvt=ReferenceField('Nvt',verbose_name="Nvt")
+    references = ListField(verbose_name="References")
+    certs = ListField(verbose_name="Certs")
+    cves = ListField(verbose_name="CVE")
 
 
     def create(self, res):
@@ -32,52 +33,25 @@ class Result(Result):
         self.severity=res.find('severity').text
         self.qod=res.find('qod').find('value').text
         self.description=res.find('description').text if res.find('description') is not None else None
-        self.description=self.description.split('\n') if self.description is not None else None
-        self.nvt=Nvt().create(res.find('nvt')).id
+        self.information={'description':self.description}
+
+        nvt=res.find('nvt')
+        self.extract_references(nvt.find('xref').text)
+        self.extract_information(nvt.find('tags').text)
+        self.extract_cves(nvt.find('cve').text)
+        self.extract_certs(nvt.find('cert'))
         try:
             obj=self.save(validate=False)
         except Exception as e:
-            print(e)
+            raise ImportVulscanError("Error importing file")
 
 
         return obj
 
     def info(self):
         result = self.to_mongo()
-        result['nvt']=self.nvt
 
         return result
-
-class Nvt(YetiDocument):
-
-    DISPLAY_INFO = [("summary", "Summary"), ("impact", "Impact"), ("affected", "Affected Software/OS"), ("insight", "Vulnerability Insight"), ("insight", "Vulnerability insight"), ("solution", "Solution"), ("vuldetect", "Vulnerability detection method")]
-
-    oid = StringField(verbose_name="OID", unique=True)
-    name=StringField(verbose_name="Name")
-    family=StringField(verbose_name="Family")
-    references=ListField(verbose_name="References")
-    information=DictField(verbose_name="Information")
-    certs=ListField(verbose_name="Certs")
-    cves=ListField(verbose_name="CVE")
-
-
-    def create(self,nvt):
-
-        self.oid = nvt.attrib.values()[0]
-
-        try:
-            obj=Nvt.objects.get(oid=self.oid)
-        except DoesNotExist:
-            self.name = nvt.find('name').text
-            self.family = nvt.find('family').text
-
-            self.extract_references(nvt.find('xref').text)
-            self.extract_information(nvt.find('tags').text)
-            self.extract_cves(nvt.find('cve').text)
-            self.extract_certs(nvt.find('cert'))
-            obj = self.save()
-
-        return obj
 
     def extract_certs(self, certs):
         list=[]
@@ -110,13 +84,7 @@ class Nvt(YetiDocument):
                 element[1]=('=').join(list_temp)
             e[element[0]]=element[1]
 
-        self.information=e
-
-    def info(self):
-        result = self.to_mongo()
-
-        return result
-
+        self.information.update(e)
 
 class Openvas(Vulscan):
     oid=StringField(verbose_name="OID")
@@ -124,34 +92,38 @@ class Openvas(Vulscan):
     ports=ListField(verbose_name="Ports")
     results_count=IntField(verbose_name="Rresults count")
     severity=DecimalField(verbose_name="Severity")
-    results=ListField(ReferenceField('Result',verbose_name="Results"))
+    results=ListField(ReferenceField('OpenvasResult',verbose_name="Results"))
 
     exclude_fields = Vulscan.exclude_fields+['scan_date','hosts','ports','results_count','severity','results','oid']
 
-    def import_file(self,file):
-        if (not file):
-            raise NoImportFile("No file found")
-        try:
-            self.create(file)
-            self.save(validate=False)
+    def import_file(self,file, update=False):
+        if (file):
+            try:
+                self.create(file)
 
-            return self
+            except NotUniqueError as e:
+                raise NotUniqueError()
 
-        except NotUniqueError as e:
-            raise NotUniqueError()
+            except Exception as e:
+                raise ImportVulscanError("Error importing file")
+        else:
+            if (not update):
+                raise NoImportFile("No file found")
 
-        except Exception as e:
-            raise ImportVulscanError("Error importing file")
+        self.save(validate=False)
+
+        return self
 
 
-    def create(self, f):
-        file = ET.parse(f)
-        report = file.getroot().find('report')
+    def create(self, file):
+        f = ET.parse(file)
+        report = f.getroot().find('report')
         #self.created_by=form.get('created_by')
-        self.oid=file.getroot().attrib.values()[3]
+        self.oid=f.getroot().attrib.values()[3]
         if not self.name:
-            self.name = 'Openvas({})'.format(file.getroot().find('name').text)
-        self.report_date = datetime.strptime(file.getroot().find('creation_time').text,'%Y-%m-%dT%H:%M:%SZ')
+            self.name = 'Openvas({})'.format(f.getroot().find('name').text)
+        self.scan_created= datetime.strptime(f.getroot().find('creation_time').text,'%Y-%m-%dT%H:%M:%SZ')
+        self.scan_updated= datetime.strptime(f.getroot().find('modification_time').text,'%Y-%m-%dT%H:%M:%SZ')
         self.results_count = report.find('result_count').find('filtered').text
         self.severity = report.find('severity').find('filtered').text
 
@@ -159,12 +131,14 @@ class Openvas(Vulscan):
         self.extract_ports(report.find('ports').findall('port'))
         self.extract_results(report.find('results'))
 
+        file.seek(0)
+
         return self
 
     def save_observables(self):
         for host in self.hosts:
             ip=Ip.get_or_create(value=host)
-            ip.active_link_to(self,"Scan","web interface")
+            ip.active_link_to(self,"Scan Report","web interface")
 
 
     def extract_hosts(self,hosts):
@@ -192,7 +166,7 @@ class Openvas(Vulscan):
         list=[]
 
         for r in results:
-            result=Result().create(r)
+            result=OpenvasResult().create(r)
             list.append(result)
 
         self.results=list

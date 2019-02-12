@@ -33,18 +33,17 @@
                                 <div class="col-md-12">
                                     <table class="table main-table yeti-table">
                                         <tbody>
-                                        {% if result['description'] %}
-                                            <tr>
-                                                <td>
-                                                    <b>Description</b>
-                                                    {{ openvas.display_description(result['description']) }}
-                                                </td>
-                                            </tr>
-                                        {% endif %}
-                                        {% set nvt=result.nvt %}
-                                            {{ openvas.display_info(nvt) }}
-                                            {% if nvt['cvs'] or nvt['certs'] or nvt['references']%}
-                                            {{ openvas.display_references(nvt) }}
+{#                                        {% if result['description'] %}#}
+{#                                            <tr>#}
+{#                                                <td>#}
+{#                                                    <b>Description</b>#}
+{#                                                    {{ openvas.display_field(result['description']) }}#}
+{#                                                </td>#}
+{#                                            </tr>#}
+{#                                        {% endif %}#}
+                                            {{ openvas.display_info(result) }}
+                                            {% if result['cvs'] or result['certs'] or result['references']%}
+                                            {{ openvas.display_references(result) }}
                                             {% endif %}
                                         </tbody>
                                     </table>

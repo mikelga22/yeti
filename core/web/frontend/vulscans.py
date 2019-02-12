@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from flask_classy import route
 from flask_login import current_user
-from flask import render_template, request, flash, redirect, url_for
+from flask import render_template, request, flash, redirect, url_for, abort
 from mongoengine import DoesNotExist
 from core.errors import GenericValidationError, ImportVulscanError, NoImportFile
 from mongoengine import NotUniqueError
@@ -47,14 +47,16 @@ class VulscanView(GenericView):
         return render_template(
         "{}/single.html".format(obj.type.lower()), obj=obj)
 
-    def post_save(self, o, request):
-        o.save_observables()
+    def post_save(self, obj, request):
+        obj.save_observables()
 
-        f = AttachedFile.from_upload(request.files['vulscan-file'])
-        if f:
-            f.attach(o)
-        return redirect(
-            url_for('frontend.{}:get'.format(self.__class__.__name__), id=o.id))
+        file=request.files.get('vulscan-file')
+        if file:
+            file.filename = obj.updated.strftime("%Y-%m-%d_%H:%M") + '.{}'.format(file.filename.split('.')[1])
+            f = AttachedFile.from_upload(file)
+            f.attach(obj)
+        else:
+            print("Hola")
 
     def handle_form(self, id=None, klass=None, skip_validation=False):
         update=False;
@@ -73,8 +75,8 @@ class VulscanView(GenericView):
             form.populate_obj(obj)
             try:
                 self.pre_validate(obj, request)
-                if(not update):
-                    obj = obj.import_file(request.files.get('vulscan-file'))
+                if(True):
+                    obj = obj.import_file(request.files.get('vulscan-file'),update)
                 else:
                     ob=obj.save(validate=False)
                 self.post_save(obj, request)

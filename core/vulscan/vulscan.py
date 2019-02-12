@@ -1,15 +1,10 @@
 from __future__ import unicode_literals
 
-from mongoengine import StringField, DateTimeField
+from mongoengine import StringField, DateTimeField, DictField
 from datetime import datetime
 from flask_mongoengine.wtf import model_form
-from flask import url_for
-from core.errors import ImportVulscanError, NoImportFile
-from mongoengine import NotUniqueError
 
-from core.database import Node, YetiDocument, TagListField, EntityListField
-from core.observables import Tag
-
+from core.database import Node, YetiDocument
 
 class Vulscan(Node):
     SEARCH_ALIASES = {}
@@ -20,14 +15,15 @@ class Vulscan(Node):
         "openvas": "OpenVas"
     }
 
-    exclude_fields = Node.exclude_fields + ["scan_date", "created", "updated", "created_by"]
+    exclude_fields = Node.exclude_fields + ["scan_created", "scan_updated", "created", "updated", "created_by"]
 
     name = StringField(verbose_name="Name", unique=True, max_length=1024)
     description = StringField(verbose_name="Description")
     #created_by = StringField(verbose_name="Created By")
     created = DateTimeField(default=datetime.utcnow)
     updated = DateTimeField(default=datetime.utcnow)
-    scan_date = DateTimeField(verbose_name="Scan date")
+    scan_created = DateTimeField(verbose_name="Scan created")
+    scan_updated = DateTimeField(verbose_name="Scan updated")
     scanner = StringField(
         verbose_name="Scanner",
         choices=SCANNERS.items(),
@@ -46,12 +42,24 @@ class Vulscan(Node):
 
         return result
 
-    def import_file(self, form, file):
+    def import_file(self, form, file, update=False):
         pass
 
     def save_observables(self):
         pass
 
+    def save(self, *args, **kwargs):
+        self.updated = datetime.utcnow()
+
+        return super(Vulscan, self).save(*args, **kwargs)
+
 class Result(YetiDocument):
 
     meta = {"allow_inheritance": True}
+
+    DISPLAY_INFO=[]
+
+    name = StringField(verbose_name="Name")
+    port = StringField(verbose_name="Port")
+    host = StringField(verbose_name="Host")
+    information = DictField(verbose_name="Information")
