@@ -95,14 +95,14 @@
                     {% endfor %}
                     <tr><th><br><h5>Scan info</h5></th><td></td></tr>
                     {% for key, value in items %}
-                    {% if key not in ["created_by", "created", "updated", "_id", "results", "_cls", "description", "oid","attached_files","name", "ports", "severity"] %}
+                    {% if key not in ["created_by", "hosts","created", "updated", "_id", "results", "_cls", "description", "oid","attached_files","name", "ports", "severity"] %}
                     <tr>
                         <th>{{macros.format_name(key)}}</th>
                         {% if key not in ["hosts", "ports"] %}
                         <td>{{macros.display_yeti(vulscan, key)}}</td>
                         {% else %}
                         <td>
-                        {% for value in vulscan[key]%}
+                            {% for value in vulscan[key]%}
                             <div>{{value}}</div>
                         {% endfor %}
                         </td>
@@ -162,23 +162,25 @@
 
 
     <ul class="nav nav-tabs" role="tablist">
-      <li role="presentation" class="active"><a href="#ttp" aria-controls="ttp" role="tab" data-toggle="tab">TTP</a></li>
+      {% if observable_read %}
+      <li role="presentation" class="active"><a href="#observables" aria-controls="observables" role="tab" data-toggle="tab">Observables</a></li>
+      {% endif %}
+    {% if entity_read %}
+      <li role="presentation"><a href="#ttp" aria-controls="ttp" role="tab" data-toggle="tab">TTP</a></li>
       <li role="presentation"><a href="#malware" aria-controls="malware" role="tab" data-toggle="tab">Malware</a></li>
       <li role="presentation"><a href="#actors" aria-controls="actors" role="tab" data-toggle="tab">Actors</a></li>
       <li role="presentation"><a href="#campaigns" aria-controls="campaigns" role="tab" data-toggle="tab">Campaigns</a></li>
       <li role="presentation"><a href="#exploits" aria-controls="exploits" role="tab" data-toggle="tab">Exploits</a></li>
       <li role="presentation"><a href="#exploitkits" aria-controls="exploitkits" role="tab" data-toggle="tab">ExploitKits</a></li>
+    {% endif %}
       {% if indicator_read %}
       <li role="presentation"><a href="#indicators" aria-controls="indicators" role="tab" data-toggle="tab">Indicators</a></li>
-      {% endif %}
-      {% if observable_read %}
-      <li role="presentation"><a href="#observables" aria-controls="observables" role="tab" data-toggle="tab">Observables</a></li>
       {% endif %}
     </ul>
 
     <div class="tab-content">
 
-        <div role="tabpanel" class="tab-pane active" id="ttp"> <!-- TTP tab -->
+        <div role="tabpanel" class="tab-pane" id="ttp"> <!-- TTP tab -->
           <div class="row">
             <div class="col-md-12">
               {{ filterlist.inline_filter(url_for("api.Neighbors:tuples", klass="vulscan", node_id=vulscan.id, type_filter="ttp"), "ttp-pivot") }}
@@ -265,7 +267,7 @@
         {% endif %}
 
         {% if observable_read %}
-        <div role="tabpanel" class="tab-pane" id="observables"> <!-- Observables tab -->
+        <div role="tabpanel" class="tab-pane active" id="observables"> <!-- Observables tab -->
           <div class="row">
             <div class="col-md-12">
               {{ filterlist.inline_filter(url_for("api.Neighbors:tuples", klass="vulscan", node_id=vulscan.id, type_filter="observable"), "observable-pivot", default_key="value") }}

@@ -131,11 +131,26 @@ class Openvas(Vulscan):
 
         return self
 
+    def delete(self):
+        for host in self.hosts:
+            ip=Ip.objects.get(value=host)
+            context={'source':self.name}
+            ip.remove_context(context)
+
+        super(Openvas, self).delete()
+
     def save_observables(self):
+        results = self.results
         for host in self.hosts:
             ip=Ip.get_or_create(value=host)
             ip.active_link_to(self,"Scan Report","web interface")
-
+            context={'source':self.name}
+            i=1
+            for res in results:
+                if res.host==host:
+                    context['Result_{}'.format(i)]=res.name
+                    i+=1
+            ip.add_context(context, replace_source=self.name)
 
     def extract_hosts(self,hosts):
         list=[]
