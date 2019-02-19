@@ -5,7 +5,7 @@ from core.errors import GenericValidationError, ImportVulscanError, NoImportFile
 from mongoengine import NotUniqueError
 
 from core.web.frontend.generic import GenericView
-from core.vulscan import Vulscan
+from core.vulscan import Vulscan, Result
 from core.openvas import Openvas
 from core.database import AttachedFile
 from core.web.helpers import requires_permissions
@@ -20,20 +20,11 @@ class VulscanView(GenericView):
 
     @requires_permissions("read","vulscan")
     #@route('/result/<id>/<string:name>', methods=["GET", "POST"])
-    def result(self, id, name):
-        if ('_' in name):
-            words=name.split('_')
-            name=('/').join(words)
-        obj = self.klass.objects.get(id=id)
-        for result in obj.results:
-            if result.name==name:
-                return render_template(
-                    "{}/result.html".format('openvas'), obj=result)
-
-    @requires_permissions("read","vulscan")
-    def filter(self, field,value):
+    def result(self, id, scanner):
+        klass = Result
+        obj = klass.objects.get(id=id)
         return render_template(
-            "{}/filter.html".format('openvas'), obj={'field':field, 'value':value})
+            "{}/result.html".format(scanner), obj=obj)
 
     @requires_permissions("read","vulscan")
     def get(self, id):
@@ -49,8 +40,6 @@ class VulscanView(GenericView):
             file.filename = obj.updated.strftime("%Y-%m-%d_%H:%M") + '.{}'.format(file.filename.split('.')[1])
             f = AttachedFile.from_upload(file)
             f.attach(obj)
-        else:
-            print("Hola")
 
     def handle_form(self, id=None, klass=None, skip_validation=False):
         update=False;

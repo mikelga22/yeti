@@ -8,7 +8,7 @@
 {% macro display_threatbar(threat,severity) -%}
     <div class=" threat-div">
         <div class=" progressbar-threat {{ threat.lower() }}" style="width:{{ severity *10 }}px;">
-            <div class="progressbar-threat-text">{{ severity }} ({{ threat }})</div>
+            <div class="progressbar-threat-text">{% if severity>-1 %}{{ severity }}{% endif %} ({{ threat }})</div>
         </div>
     </div>
 {%- endmacro %}
@@ -22,6 +22,8 @@
         Medium
     {% elif 6.9 < severity < 11 -%}
         High
+    {% elif severity < 0 -%}
+        False positive
     {% endif %}
 {%- endmacro %}
 

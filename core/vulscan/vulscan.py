@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from mongoengine import StringField, DateTimeField, DictField
+from mongoengine import StringField, DateTimeField, DictField, ListField, ReferenceField
 from datetime import datetime
 from flask_mongoengine.wtf import model_form
 
@@ -15,19 +15,19 @@ class Vulscan(Node):
         "openvas": "OpenVas"
     }
 
-    exclude_fields = Node.exclude_fields + ["scan_created", "scan_updated", "created", "updated", "created_by"]
+    exclude_fields = Node.exclude_fields + ["scan_date", "created", "updated", "created_by", 'results']
 
     name = StringField(verbose_name="Name", unique=True, max_length=1024)
     description = StringField(verbose_name="Description")
     #created_by = StringField(verbose_name="Created By")
     created = DateTimeField(default=datetime.utcnow)
     updated = DateTimeField(default=datetime.utcnow)
-    scan_created = DateTimeField(verbose_name="Scan created")
-    scan_updated = DateTimeField(verbose_name="Scan updated")
+    scan_date = DateTimeField(verbose_name="Scan created")
     scanner = StringField(
         verbose_name="Scanner",
         choices=SCANNERS.items(),
         required=True)
+    results = ListField(ReferenceField('OpenvasResult', verbose_name="Results"))
 
     @classmethod
     def get_form(klass, override=None):

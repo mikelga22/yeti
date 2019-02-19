@@ -11,9 +11,10 @@ import re
 
 class OpenvasResult(Result):
 
-    DISPLAY_INFO = [("description", "Description"),("summary", "Summary"), ("impact", "Impact"), ("affected", "Affected Software/OS"),("insight", "Vulnerability Insight"), ("insight", "Vulnerability insight"),("solution", "Solution"), ("vuldetect", "Vulnerability detection method")]
+    DISPLAY_INFO = [("description", "Description"),("summary", "Summary"), ("impact", "Impact"), ("affected", "Affected Software/OS"),("insight", "Vulnerability Insight"),("solution", "Solution"), ("vuldetect", "Vulnerability detection method")]
 
     threat=StringField(verbose_name="Threat")
+    family=StringField(verbose_name="Threat")
     severity=DecimalField(verbose_name="Severity")
     qod=IntField(verbose_name="QoD")
     references = ListField(verbose_name="References")
@@ -28,8 +29,8 @@ class OpenvasResult(Result):
         self.threat=res.find('threat').text
         self.severity=res.find('severity').text
         self.qod=res.find('qod').find('value').text
-        self.description=res.find('description').text if res.find('description') is not None else None
-        self.information={'description':self.description}
+        description=res.find('description').text if res.find('description') is not None else None
+        self.information={'description':description}
 
         nvt=res.find('nvt')
         self.extract_references(nvt.find('xref').text)
@@ -88,9 +89,8 @@ class Openvas(Vulscan):
     ports=ListField(verbose_name="Ports")
     results_count=IntField(verbose_name="Rresults count")
     severity=DecimalField(verbose_name="Severity")
-    results=ListField(ReferenceField('OpenvasResult',verbose_name="Results"))
 
-    exclude_fields = Vulscan.exclude_fields+['scan_date','hosts','ports','results_count','severity','results','oid']
+    exclude_fields = Vulscan.exclude_fields+['scan_date','hosts','ports','results_count','severity','oid']
 
     def import_file(self,file, update=False):
         if (file):
@@ -118,8 +118,7 @@ class Openvas(Vulscan):
         self.oid=f.getroot().attrib.values()[3]
         if not self.name:
             self.name = 'Openvas({})'.format(f.getroot().find('name').text)
-        self.scan_created= datetime.strptime(f.getroot().find('creation_time').text,'%Y-%m-%dT%H:%M:%SZ')
-        self.scan_updated= datetime.strptime(f.getroot().find('modification_time').text,'%Y-%m-%dT%H:%M:%SZ')
+        self.scan_date= datetime.strptime(f.getroot().find('creation_time').text,'%Y-%m-%dT%H:%M:%SZ')
         self.results_count = report.find('result_count').find('filtered').text
         self.severity = report.find('severity').find('filtered').text
 
@@ -150,6 +149,8 @@ class Openvas(Vulscan):
                 if res.host==host:
                     context['Result_{}'.format(i)]=res.name
                     i+=1
+                    results.remove(res)
+                    break
             ip.add_context(context, replace_source=self.name)
 
     def extract_hosts(self,hosts):
