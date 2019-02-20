@@ -149,8 +149,6 @@ class Openvas(Vulscan):
                 if res.host==host:
                     context['Result_{}'.format(i)]=res.name
                     i+=1
-                    results.remove(res)
-                    break
             ip.add_context(context, replace_source=self.name)
 
     def extract_hosts(self,hosts):
