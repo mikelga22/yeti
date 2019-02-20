@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from flask import render_template, request, flash, redirect, url_for
-from core.errors import GenericValidationError, ImportVulscanError, NoImportFile
+from core.errors import GenericValidationError, ImportVulscanError, NoImportFileError
 from mongoengine import NotUniqueError
 
 from core.web.frontend.generic import GenericView
@@ -91,7 +91,7 @@ class VulscanView(GenericView):
                     obj_type=klass.__name__,
                     obj=None)
 
-            except NoImportFile as e:
+            except NoImportFileError as e:
                 form.errors['Error'] = [
                     'Not file selected. Please, select a file'
                 ]

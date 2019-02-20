@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from core.errors import ImportVulscanError, NoImportFile
+from core.errors import ImportVulscanError, NoImportFileError
 from mongoengine import *
 from core.vulscan import Vulscan, Result
 from core.observables import Ip
@@ -104,7 +104,7 @@ class Openvas(Vulscan):
                 raise ImportVulscanError("Error importing file")
         else:
             if (not update):
-                raise NoImportFile("No file found")
+                raise NoImportFileError("No file found")
 
         self.save(validate=False)
 

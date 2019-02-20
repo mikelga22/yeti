@@ -60,7 +60,7 @@
 {#                        {{ result['cves']|join(", ") }}#}
                         {% for cve in result['cves']%}
                             <a href="https://nvd.nist.gov/vuln/detail/{{ cve }}" target="_blank">{{ cve }}</a>
-                            {%- if loop.first %},{% endif %}
+                            {%- if not loop.last %},{% endif %}
                         {% endfor %}
                     </td>
                 </tr>

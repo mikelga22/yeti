@@ -37,5 +37,5 @@ class TagValidationError(GenericYetiError):
 class ImportVulscanError(GenericYetiError):
     pass
 
-class NoImportFile(GenericYetiError):
+class NoImportFileError(GenericYetiError):
     pass
